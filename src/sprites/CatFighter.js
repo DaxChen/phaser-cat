@@ -33,14 +33,32 @@ export default class extends Phaser.Sprite {
     // weapons
     this.currentWeapon = 'fireball'
     this.weapons = {}
-    this.weapons.fireball = new FireballNormal(game)
+    // Creates 30 bullets, using the 'bullet' graphic
+    const fireball = game.add.weapon(64, 'fireball_charged')
+    this.weapons.fireball = fireball
+    // The bullet will be automatically killed when it reaches `bulletKillDistance` (pixels)
+    fireball.bulletKillType = Phaser.Weapon.KILL_DISTANCE
+    fireball.bulletKillDistance = 300
+    // The speed at which the bullet is fired
+    fireball.bulletSpeed = 400
+    // Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+    fireball.fireRate = 300
+    //  Tell the Weapon to track the 'player' Sprite
+    //  With no offsets from the position
+    //  But the 4th 'true' argument tells the weapon to track sprite rotation
+    fireball.trackSprite(this, 0, 0)
+    fireball.trackOffset.y = 6
+    fireball.bulletRotateToVelocity = true
+    fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
 
     // camara
     // the camera will follow the player in the world
     this.game.camera.follow(this)
+    this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR)
 
     // controls
     this.cursors = game.input.keyboard.createCursorKeys()
+    // stop the event from propagating up to the browser
     game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ])
 
     this.animations.play('idle')
@@ -54,12 +72,13 @@ export default class extends Phaser.Sprite {
     if (this.cursors.left.isDown) {
       //  Move to the left
       velocity.x = -this.speed
-      // this.scale.setTo(-1, 1)
+      this.scale.setTo(-1, 1)
       this.animations.play('walk')
     } else if (this.cursors.right.isDown) {
       //  Move to the right
       velocity.x = this.speed
       this.scale.setTo(1, 1)
+      this.animations.play('walk')
       this.animations.play('walk')
     }
 
@@ -81,8 +100,15 @@ export default class extends Phaser.Sprite {
       this.direction = Math.atan2(velocity.y, velocity.x) * (180 / Math.PI)
     }
 
-    if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      this.weapons[this.currentWeapon].fire(this)
+    if (this.fireButton.isDown) {
+      this.weapons[this.currentWeapon].fireAngle = this.direction
+      this.weapons[this.currentWeapon].trackOffset.x = 0
+      if (this.direction <= 45 && this.direction >= -45) {
+        this.weapons[this.currentWeapon].trackOffset.x = 10
+      } else if (this.direction <= -135 || this.direction >= 135) {
+        this.weapons[this.currentWeapon].trackOffset.x = -10
+      }
+      this.weapons[this.currentWeapon].fire()
     }
   }
 }
