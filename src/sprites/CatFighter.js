@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import FireballNormal from '../weapons/FireballNormal'
 
 export default class extends Phaser.Sprite {
 
@@ -29,13 +28,28 @@ export default class extends Phaser.Sprite {
     this.animations.add('idle', [0, 1, 2, 3], 10, true)
     this.animations.add('walk', [16, 17, 18, 19, 20, 21, 22, 23], 16, true)
     this.animations.add('power-shot', [80, 81, 82, 83, 84, 85, 86], 12, false)
+    this.animations.play('idle')
 
     // weapons
     this.currentWeapon = 'fireball'
     this.weapons = {}
     // Creates 30 bullets, using the 'bullet' graphic
-    const fireball = game.add.weapon(64, 'fireball_charged')
-    this.weapons.fireball = fireball
+    this.weapons.fireball = game.add.weapon(30, 'fireball_charged')
+    this.initFireball()
+
+    // camara
+    // the camera will follow the player in the world
+    this.game.camera.follow(this)
+
+    // controls
+    this.cursors = game.input.keyboard.createCursorKeys()
+    this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR)
+    // stop the event from propagating up to the browser
+    game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ])
+  }
+
+  initFireball () {
+    const { fireball } = this.weapons
     // The bullet will be automatically killed when it reaches `bulletKillDistance` (pixels)
     fireball.bulletKillType = Phaser.Weapon.KILL_DISTANCE
     fireball.bulletKillDistance = 300
@@ -50,18 +64,6 @@ export default class extends Phaser.Sprite {
     fireball.trackOffset.y = 6
     fireball.bulletRotateToVelocity = true
     fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
-
-    // camara
-    // the camera will follow the player in the world
-    this.game.camera.follow(this)
-    this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR)
-
-    // controls
-    this.cursors = game.input.keyboard.createCursorKeys()
-    // stop the event from propagating up to the browser
-    game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ])
-
-    this.animations.play('idle')
   }
 
   update () {
