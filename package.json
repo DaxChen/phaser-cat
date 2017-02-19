@@ -1,12 +1,12 @@
 {
-  "name": "PhaserES6Webpack",
-  "version": "1.0.0",
+  "name": "phaser-cat",
+  "version": "0.1.0",
   "description": "",
-  "author": "leandro cabrera <leandcabrera@gmail.com>",
+  "author": "DaxChen <dd@daxchen.com>",
   "main": "index.js",
   "scripts": {
     "dev": "webpack",
-    "deploy": "webpack --config webpack.production.config.js",
+    "deploy": "node build/build.js",
     "test": "standard"
   },
   "license": "MIT",
@@ -22,6 +22,8 @@
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
     "expose-loader": "^0.7.1",
+    "ora": "^1.1.0",
+    "shelljs": "^0.7.6",
     "webpack": "^2.2.0"
   },
   "dependencies": {
