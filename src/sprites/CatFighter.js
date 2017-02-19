@@ -19,15 +19,15 @@ export default class extends Phaser.Sprite {
     // this.scale.setTo(2, 2)
     this.speed = 150
 
-    // direction is defined as
-    // east: 0, north: -90 or 270, west: +_180, south: 90
+    // direction is calculated via `Math.atan2`, with the following results:
+    // east: 0, north: -90, west: 180, south: 90
     // north-east: -45, north-west: -135, south-east: 45, south-west: 135
     this.direction = 0
 
     // animations
     this.animations.add('idle', [0, 1, 2, 3], 10, true)
     this.animations.add('walk', [16, 17, 18, 19, 20, 21, 22, 23], 16, true)
-    this.animations.add('power-shot', [80, 81, 82, 83, 84, 85, 86], 12, false)
+    this.animations.add('fireball', [80, 81, 82, 83, 84, 85, 86], 12, false)
     this.animations.play('idle')
 
     // weapons
@@ -63,7 +63,9 @@ export default class extends Phaser.Sprite {
     fireball.trackSprite(this, 0, 0)
     fireball.trackOffset.y = 6
     fireball.bulletRotateToVelocity = true
+    // fireball.addBulletAnimation('end', [4, 5, 6], 12, true)
     fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
+    // fireball.onKill.add((bullet) => { console.log('onKill'); bullet.animations.play('end') })
   }
 
   update () {
@@ -103,6 +105,7 @@ export default class extends Phaser.Sprite {
     }
 
     if (this.fireButton.isDown) {
+      // this.animations.play('fireball')
       this.weapons[this.currentWeapon].fireAngle = this.direction
       this.weapons[this.currentWeapon].trackOffset.x = 0
       if (this.direction <= 45 && this.direction >= -45) {

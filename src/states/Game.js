@@ -11,7 +11,7 @@ export default class extends Phaser.State {
 
   create () {
     // banner
-    const bannerText = 'Berber'
+    const bannerText = 'use ← ↑ → ↓ to move, spacebar to fire!'
     let banner = this.add.text(this.world.centerX, this.game.height - 80, bannerText)
     banner.font = 'Bangers'
     banner.padding.set(10, 16)
@@ -37,24 +37,47 @@ export default class extends Phaser.State {
 
     this.player = new CatFighter({
       game: this.game,
-      x: 150,
-      y: this.world.height - 150,
+      x: this.world.centerX,
+      y: this.world.centerY,
       asset: 'cat'
     })
 
     this.game.add.existing(this.player)
 
-    this.monster1group = new Monster1Group(this.game)
-    this.monster1group.spawn(100, 200)
+    this.monster1group = new Monster1Group({ game: this.game, target: this.player })
+    // this.monster1group.spawn(100, 200)
+    this.nextEnemy = 0
+    this.spawnRate = 3000
   }
 
   update () {
+    this.spawnEnemies()
+    this.game.physics.arcade.overlap(this.player.weapons.fireball.bullets, this.monster1group, (bullet, enemy) => {
+      enemy.hit(bullet)
+      bullet.kill()
+    })
+    this.game.physics.arcade.overlap(this.monster1group, this.player, (monster, player) => {
+      console.log('die!')
+    })
+  }
+
+  spawnEnemies () {
+    if (this.game.time.time < this.nextEnemy) { return }
+
+    if (Math.random() < 0.5) {
+      this.monster1group.spawn(Math.random() < 0.5 ? 0 : this.world.width, this.world.randomY)
+    } else {
+      this.monster1group.spawn(this.world.randomX, Math.random() < 0.5 ? 0 : this.world.height)
+    }
+
+    this.nextEnemy = this.game.time.time + this.spawnRate
   }
 
   render () {
     if (__DEV__) {
       // this.game.debug.spriteInfo(this.player, 32, 32)
       this.player.weapons.fireball.debug()
+      // this.game.debug.spriteInfo(this.monster1group)
     }
   }
 }
