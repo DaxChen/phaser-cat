@@ -48,6 +48,18 @@ export default class extends Phaser.State {
     // this.monster1group.spawn(100, 200)
     this.nextEnemy = 0
     this.spawnRate = 3000
+
+    // debug body sizes
+    // this.debugMonster1 = this.game.add.sprite(100, 100, 'monster1')
+    // this.debugMonster1.animations.add('move', [0, 1, 2, 3, 4], 2, true)
+    // this.debugMonster1.animations.play('move')
+    // this.game.physics.arcade.enable(this.debugMonster1)
+    // this.debugMonster1.body.setSize(25, 24, 19, 26)
+    // this.debugFireball = this.game.add.sprite(100, 200, 'fireball_charged')
+    // this.debugFireball.animations.add('fly', [0, 1, 2, 3], 2, true)
+    // this.debugFireball.animations.play('fly')
+    // this.game.physics.arcade.enable(this.debugFireball)
+    // this.debugFireball.body.setSize(16, 16, 12, 9)
   }
 
   update () {
@@ -56,7 +68,8 @@ export default class extends Phaser.State {
       enemy.hit(bullet)
       bullet.kill()
     })
-    this.game.physics.arcade.overlap(this.monster1group, this.player, (monster, player) => {
+    this.game.physics.arcade.collide(this.monster1group, this.monster1group)
+    this.game.physics.arcade.collide(this.monster1group, this.player, (monster, player) => {
       console.log('die!')
     })
   }
@@ -76,7 +89,11 @@ export default class extends Phaser.State {
   render () {
     if (__DEV__) {
       // this.game.debug.spriteInfo(this.player, 32, 32)
-      this.player.weapons.fireball.debug()
+      // this.player.weapons.fireball.debug(32, 32, true)
+      // this.game.debug.bodyInfo(this.player, 32, 32)
+      // this.game.debug.body(this.player)
+      // this.game.debug.body(this.debugMonster1)
+      // this.game.debug.body(this.debugFireball)
       // this.game.debug.spriteInfo(this.monster1group)
     }
   }

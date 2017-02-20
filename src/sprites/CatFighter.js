@@ -63,6 +63,7 @@ export default class extends Phaser.Sprite {
     fireball.trackSprite(this, 0, 0)
     fireball.trackOffset.y = 6
     fireball.bulletRotateToVelocity = true
+    fireball.setBulletBodyOffset(16, 16, 12, 9)
     // fireball.addBulletAnimation('end', [4, 5, 6], 12, true)
     fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
     // fireball.onKill.add((bullet) => { console.log('onKill'); bullet.animations.play('end') })
