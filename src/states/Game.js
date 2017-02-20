@@ -89,7 +89,7 @@ export default class extends Phaser.State {
   render () {
     if (__DEV__) {
       // this.game.debug.spriteInfo(this.player, 32, 32)
-      // this.player.weapons.fireball.debug(32, 32, true)
+      // this.player.weapons.fireball.debug(32, 32/* , true */)
       // this.game.debug.bodyInfo(this.player, 32, 32)
       // this.game.debug.body(this.player)
       // this.game.debug.body(this.debugMonster1)

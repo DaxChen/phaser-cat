@@ -52,7 +52,7 @@ export default class extends Phaser.Sprite {
     const { fireball } = this.weapons
     // The bullet will be automatically killed when it reaches `bulletKillDistance` (pixels)
     fireball.bulletKillType = Phaser.Weapon.KILL_DISTANCE
-    fireball.bulletKillDistance = 300
+    fireball.bulletKillDistance = 200
     // The speed at which the bullet is fired
     fireball.bulletSpeed = 400
     // Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
@@ -64,9 +64,13 @@ export default class extends Phaser.Sprite {
     fireball.trackOffset.y = 6
     fireball.bulletRotateToVelocity = true
     fireball.setBulletBodyOffset(16, 16, 12, 9)
-    // fireball.addBulletAnimation('end', [4, 5, 6], 12, true)
+    fireball.addBulletAnimation('end', [4, 5, 6], 12, false)
     fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
-    // fireball.onKill.add((bullet) => { console.log('onKill'); bullet.animations.play('end') })
+    fireball.onKill.add((bullet) => {
+      bullet.exists = true
+      bullet.body.velocity.setTo(bullet.body.velocity.x / 10, bullet.body.velocity.y / 10)
+      bullet.animations.play('end').onComplete.add(() => { bullet.exists = false })
+    })
   }
 
   update () {
