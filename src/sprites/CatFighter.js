@@ -68,8 +68,10 @@ export default class extends Phaser.Sprite {
     fireball.addBulletAnimation('fly', [0, 1, 2, 3], 12, true)
     fireball.onKill.add((bullet) => {
       bullet.exists = true
+      bullet.dying = true
       bullet.body.velocity.setTo(bullet.body.velocity.x / 10, bullet.body.velocity.y / 10)
-      bullet.animations.play('end').onComplete.add(() => { bullet.exists = false })
+      // bullet.body.velocity.setTo(0, 0)
+      bullet.animations.play('end').onComplete.add(() => { bullet.exists = false; bullet.dying = false })
     })
   }
 

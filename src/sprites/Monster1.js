@@ -7,19 +7,24 @@ export default class extends Enemy {
 
     this.animations.add('move', [0, 1, 2, 3, 4], 12, true)
     this.animations.add('attack', [8, 9, 10, 11, 12], 12, true)
+    this.animations.add('hurt', [17, 18, 17], 12, false).onComplete.add(() => {
+      console.log(this.hurting)
+      this.hurting = false
+      console.log(this.hurting)
+    })
+    this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false).onComplete.add(this.death, this)
 
     // settings
     this.body.setSize(25, 24, 19, 26)
     this.speed = 60
     this.MIN_DISTANCE = 32
-
-    let deathAnimation = this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false)
-    deathAnimation.onComplete.add(this.death, this)
+    this.maxHealth = 20
+    this.setHealth(20)
   }
 
   spawn (x, y) {
     this.stdReset(x, y) // Reset everything from Enemy class
-    this.animations.play('move')
+    this.play('move')
 
     // start in a random direction
     // if (Math.random() < 0.5) {
@@ -57,10 +62,11 @@ export default class extends Enemy {
       } else {
         this.scale.x = -1
       }
-      this.animations.play('move')
     } else {
       this.body.velocity.setTo(0, 0)
-      this.animations.play('attack')
     }
+
+    // finally update the animation
+    this.checkAnim()
   }
 }

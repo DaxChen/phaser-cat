@@ -65,8 +65,10 @@ export default class extends Phaser.State {
   update () {
     this.spawnEnemies()
     this.game.physics.arcade.overlap(this.player.weapons.fireball.bullets, this.monster1group, (bullet, enemy) => {
-      enemy.hit(bullet)
-      bullet.kill()
+      if (!bullet.dying) {
+        enemy.hit(bullet)
+        bullet.kill()
+      }
     })
     this.game.physics.arcade.collide(this.monster1group, this.monster1group)
     this.game.physics.arcade.collide(this.monster1group, this.player, (monster, player) => {

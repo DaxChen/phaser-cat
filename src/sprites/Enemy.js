@@ -10,19 +10,21 @@ export default class extends Phaser.Sprite {
     game.physics.arcade.enable(this)
     // this.body.immovable = true
 
-    // settings
-    // this.body.setSize(13, 28, 24, 26)
-    // this.scale.setTo(2, 2)
-    // this.speed = 150
+    // some states
+    this.dying = false // for death animation
+    this.hurting = false // for hurt animation
+    this.attacking = false // for attack animation
   }
 
   /* Standard reset is called from the spawn-function (se example enemy later in the tutorial */
   stdReset (x, y) {
-    this.reset(x, y)
+    this.reset(x, y, this.maxHealth)
     // this.frozen = false
     // this.energy = this.maxHealth
     this.exists = true
     this.dying = false
+    this.hurting = false // for hurt animation
+    this.attacking = false // for attack animation
     this.sleeping = true // the enemy is sleeping, and will cancel it's update
   }
 
@@ -50,18 +52,36 @@ export default class extends Phaser.Sprite {
     // } else {
       // this.frozen = false // I don't care about resetting animation, this should be done by the enemy itself in its now continued update loop
       // this.health -= this.vulnerabilities[bullet.type]
+    this.hurting = true
     this.health -= 10 // TODO
+    // console.log(this.health + '/' + this.maxHealth)
       // if (this.vulnerabilities[bullet.type] === 0) { // A metallic 'klonk' when there is no damage
       //   // this.game.sound.play('ricochetShort')
       // }
     // }
 
-    if (this.health < 1) {
+    if (this.health <= 0) {
       this.dying = true
+      // we have to play animation here because stdUpdate will return false when dying
+      this.play('death')
       this.body.velocity.x = 0
       this.body.velocity.y = 0
-      this.play('death')
     }
+  }
+
+  checkAnim () {
+    // console.log(`checkAnim: dying:${this.dying}, hurting:${this.hurting}, attacking:${this.attacking}`)
+    // when this.dying, stdUpdate returns false, checkAnim won't be called...
+    // if (this.dying) { return this.play('death') }
+
+    // hurting
+    if (this.hurting) { return this.play('hurt') }
+
+    // attacking
+    if (this.attacking) { return this.play('attack') }
+
+    // else
+    this.play('move')
   }
 
   death () {
