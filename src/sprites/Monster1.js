@@ -1,23 +1,29 @@
 import Enemy from './Enemy'
 
-export default class extends Enemy {
+export default class Monster1 extends Enemy {
   constructor ({ game, target }) {
     super({ game, asset: 'monster1' })
     this.target = target
 
     this.animations.add('move', [0, 1, 2, 3, 4], 12, true)
-    this.animations.add('attack', [8, 9, 10, 11, 12], 12, true)
-    this.animations.add('hurt', [17, 18, 17], 12, false).onComplete.add(() => {
-      console.log(this.hurting)
-      this.hurting = false
-      console.log(this.hurting)
-    })
-    this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false).onComplete.add(this.death, this)
+    this.animations.add('pre-attack', [8, 9, 10], 10, false)
+      .onComplete.add(() => {
+        this.attacking = 'post-attack'
+        this.checkAttackHit()
+      })
+    this.animations.add('post-attack', [11, 12], 10, false)
+      .onComplete.add(() => { this.attacking = false })
+    this.animations.add('hurt', [17, 18, 17], 12, false)
+      .onComplete.add(() => { this.hurting = false })
+    this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false)
+      .onComplete.add(this.death, this)
 
     // settings
     this.body.setSize(25, 24, 19, 26)
     this.speed = 60
     this.MIN_DISTANCE = 32
+    this.ATTACK_DISTANCE = this.MIN_DISTANCE + 2
+    this.ATK = 10
     this.maxHealth = 20
     this.setHealth(20)
   }
@@ -50,6 +56,7 @@ export default class extends Enemy {
     const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
 
     if (distance > this.MIN_DISTANCE) {
+      // this.attacking = false
       // Calculate the angle to the target
       const rotation = this.game.math.angleBetween(this.x, this.y, this.target.x, this.target.y)
 
@@ -63,10 +70,20 @@ export default class extends Enemy {
         this.scale.x = -1
       }
     } else {
+      this.attacking = this.attacking || 'pre-attack'
       this.body.velocity.setTo(0, 0)
     }
 
     // finally update the animation
     this.checkAnim()
+  }
+
+  checkAttackHit () {
+    const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
+
+    // check if the distance is less than attack distance
+    if (distance < this.ATTACK_DISTANCE) {
+      this.target.hit(this)
+    }
   }
 }

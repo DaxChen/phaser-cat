@@ -3,7 +3,7 @@ import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
 import Monster1Group from '../sprites/Monster1Group'
 
-export default class extends Phaser.State {
+export default class Game extends Phaser.State {
   init () {
   }
   preload () {
@@ -42,6 +42,17 @@ export default class extends Phaser.State {
       asset: 'cat'
     })
 
+    // bullets
+    this.singleBullets = [
+      this.player.weapons.fireballNormal.bullets
+    ]
+    this.splashBullets = [
+      this.player.weapons.fireballCharged.bullets
+    ]
+    this.penetrableBullets = [
+      this.player.weapons.fireballSuper.bullets
+    ]
+
     this.game.add.existing(this.player)
 
     this.monster1group = new Monster1Group({ game: this.game, target: this.player })
@@ -52,28 +63,34 @@ export default class extends Phaser.State {
     // debug body sizes
     // this.debugMonster1 = this.game.add.sprite(100, 100, 'monster1')
     // this.debugMonster1.animations.add('move', [0, 1, 2, 3, 4], 2, true)
-    // this.debugMonster1.animations.play('move')
+    // this.debugMonster1.animations.add('attack', [8, 9, 10, 11, 12], 2, true)
+    // this.debugMonster1.play('attack')
     // this.game.physics.arcade.enable(this.debugMonster1)
     // this.debugMonster1.body.setSize(25, 24, 19, 26)
-    // this.debugFireball = this.game.add.sprite(100, 200, 'fireball_charged')
+    // this.debugFireball = this.game.add.sprite(100, 200, 'fireball_super')
     // this.debugFireball.animations.add('fly', [0, 1, 2, 3], 2, true)
     // this.debugFireball.animations.play('fly')
     // this.game.physics.arcade.enable(this.debugFireball)
-    // this.debugFireball.body.setSize(16, 16, 12, 9)
+    // this.debugFireball.body.setSize(16, 46, 26, 10)
   }
 
   update () {
     this.spawnEnemies()
-    this.game.physics.arcade.overlap(this.player.weapons.fireball.bullets, this.monster1group, (bullet, enemy) => {
+    this.game.physics.arcade.overlap(this.singleBullets, this.monster1group, (bullet, enemy) => {
       if (!bullet.dying) {
         enemy.hit(bullet)
         bullet.kill()
       }
     })
-    this.game.physics.arcade.collide(this.monster1group, this.monster1group)
-    this.game.physics.arcade.collide(this.monster1group, this.player, (monster, player) => {
-      console.log('die!')
+    this.game.physics.arcade.overlap(this.splashBullets, this.monster1group, (bullet, enemy) => {
+      enemy.hit(bullet)
+      if (!bullet.dying) { bullet.kill() }
     })
+    this.game.physics.arcade.overlap(this.penetrableBullets, this.monster1group, (bullet, enemy) => {
+      enemy.hit(bullet)
+    })
+    this.game.physics.arcade.collide(this.monster1group, this.monster1group)
+    this.game.physics.arcade.collide(this.monster1group, this.player)
   }
 
   spawnEnemies () {

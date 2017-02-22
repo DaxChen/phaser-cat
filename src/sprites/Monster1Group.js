@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
 import Monster1 from './Monster1'
 
-export default class extends Phaser.Group {
+export default class Monster1Group extends Phaser.Group {
   constructor ({ game, target }) {
     super(game, game.world, 'Monster1 Group', false, true, Phaser.Physics.ARCADE)
+
+    this.target = target
 
     for (var i = 0; i < 64; i++) {
       this.add(new Monster1({ game, target }), true)
@@ -11,7 +13,14 @@ export default class extends Phaser.Group {
   }
 
   spawn (x, y) {
-    this.getFirstExists(false).spawn(x, y)
+    let monster = this.getFirstExists(false)
+    if (monster) {
+      monster.spawn(x, y)
+    } else {
+      monster = new Monster1({ game: this.game, target: this.target })
+      this.add(monster, true)
+      monster.spawn(x, y)
+    }
   }
 
   // fire (source) {

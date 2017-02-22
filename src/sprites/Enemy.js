@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
+import { ATK as bulletATK } from '../weapons/weapon-config'
 
-export default class extends Phaser.Sprite {
+export default class Enemy extends Phaser.Sprite {
 
   constructor ({ game, asset }) {
     super(game, 0, 0, asset)
@@ -9,6 +10,9 @@ export default class extends Phaser.Sprite {
     // body
     game.physics.arcade.enable(this)
     // this.body.immovable = true
+
+    // this is a collection of bulletUIDs this enemy had hit already
+    this.hitBullets = []
 
     // some states
     this.dying = false // for death animation
@@ -26,6 +30,7 @@ export default class extends Phaser.Sprite {
     this.hurting = false // for hurt animation
     this.attacking = false // for attack animation
     this.sleeping = true // the enemy is sleeping, and will cancel it's update
+    this.hitBullets = []
   }
 
   /* stdUpdate is called from the enemies' update methods to do generic stuff. If it return false the update loop in the enemy calling stdUpdate should be broken. */
@@ -46,6 +51,12 @@ export default class extends Phaser.Sprite {
     if (this.dying) { // While the enemy sprite plays it's death animation it should ignore all bullets
       return
     }
+    // check bulletUID
+    if (!bullet.bulletUID) { return console.error('no bulletUID') }
+    if (this.hitBullets.indexOf(bullet.bulletUID) >= 0) { return } // already hit by this
+    // add to hitBullets
+    this.hitBullets.push(bullet.bulletUID)
+
     // if (bullet.type === 'ice' && !this.frozen) { // Ice will freeze if not frozen, but defrost if the enemy is frozen
     //   this.frozen = true
     //   this.play('frozen')
@@ -53,7 +64,8 @@ export default class extends Phaser.Sprite {
       // this.frozen = false // I don't care about resetting animation, this should be done by the enemy itself in its now continued update loop
       // this.health -= this.vulnerabilities[bullet.type]
     this.hurting = true
-    this.health -= 10 // TODO
+
+    this.health -= bulletATK[bullet.key]
     // console.log(this.health + '/' + this.maxHealth)
       // if (this.vulnerabilities[bullet.type] === 0) { // A metallic 'klonk' when there is no damage
       //   // this.game.sound.play('ricochetShort')
@@ -78,7 +90,7 @@ export default class extends Phaser.Sprite {
     if (this.hurting) { return this.play('hurt') }
 
     // attacking
-    if (this.attacking) { return this.play('attack') }
+    if (this.attacking) { return this.play(this.attacking) }
 
     // else
     this.play('move')
