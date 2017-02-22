@@ -5,5 +5,5 @@ export const ATK = {
   fireball_super: 40
 }
 
-let bulletUID = 0
+let bulletUID = 1
 export function getBulletUID () { return bulletUID++ }
