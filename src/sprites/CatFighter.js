@@ -194,7 +194,7 @@ export default class CatFighter extends Phaser.Sprite {
 
     // if just starting to fireball, not 'charge' yet (i.e. still in 'ready'),
     // lock the direction so fireball won't fly to wrong direction
-    if ((velocity.x !== 0 || velocity.y !== 0) && (!this.fireballCharging || this.fireballChargeState === 'charge')) {
+    if ((velocity.x !== 0 || velocity.y !== 0) && (!this.fireballCharging || this.fireballChargeState !== 'ready')) {
       // update direction
       this.direction = Math.atan2(velocity.y, velocity.x) * (180 / Math.PI)
     }
