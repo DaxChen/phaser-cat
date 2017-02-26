@@ -143,7 +143,7 @@ export default class CatFighter extends Phaser.Sprite {
       bullet.dying = true
       bullet.body.velocity.setTo(bullet.body.velocity.x / 10, bullet.body.velocity.y / 10)
       // bullet.body.velocity.setTo(0, 0)
-      bullet.animations.play('end').onComplete.add(() => {
+      bullet.play('end').onComplete.add(() => {
         bullet.exists = false
         bullet.dying = false
         bullet.bulletUID = null

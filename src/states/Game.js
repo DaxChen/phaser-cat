@@ -1,7 +1,8 @@
 /* globals __DEV__ */
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
-import Monster1Group from '../sprites/Monster1Group'
+// import Monster1Group from '../sprites/Monster1Group'
+import DebugEnemyGroup from '../sprites/DebugEnemyGroup'
 
 export default class Game extends Phaser.State {
   init () {
@@ -54,7 +55,8 @@ export default class Game extends Phaser.State {
       this.player.weapons.fireballSuper.bullets
     ]
 
-    this.monster1group = new Monster1Group({ game: this.game, target: this.player })
+    // this.monster1group = new Monster1Group({ game: this.game, target: this.player })
+    this.monster1group = new DebugEnemyGroup({ game: this.game, target: this.player })
     // this.monster1group.spawn(100, 200)
     this.nextEnemy = 0
     this.spawnRate = 3000
@@ -74,7 +76,7 @@ export default class Game extends Phaser.State {
   }
 
   update () {
-    // this.spawnEnemies()
+    this.spawnEnemies()
     this.game.physics.arcade.overlap(this.singleBullets, this.monster1group, (bullet, enemy) => {
       if (!bullet.dying) {
         enemy.hit(bullet)
@@ -93,14 +95,14 @@ export default class Game extends Phaser.State {
       // start with enemy1 perspective
       let collisionVectorX = enemy2.x - enemy1.x
       let collisionVectorY = enemy2.y - enemy1.y
-      if (collisionVectorX * enemy1.body.velocity.x + collisionVectorY * enemy1.body.velocity.y > 0) {
+      if (collisionVectorX * enemy1.body.velocity.x + collisionVectorY * enemy1.body.velocity.y >= 0) {
         // this is acute angle, should stop
         enemy1.wait(collisionVectorX, collisionVectorY)
       }
       // now enemy2 perspective, reverse collisionVector
       collisionVectorX *= -1
       collisionVectorY *= -1
-      if (collisionVectorX * enemy2.body.velocity.x + collisionVectorY * enemy2.body.velocity.y > 0) {
+      if (collisionVectorX * enemy2.body.velocity.x + collisionVectorY * enemy2.body.velocity.y >= 0) {
         // this is acute angle, should stop
         enemy2.wait(collisionVectorX, collisionVectorY)
       }
@@ -112,9 +114,9 @@ export default class Game extends Phaser.State {
     if (this.game.time.time < this.nextEnemy) { return }
 
     if (Math.random() < 0.5) {
-      this.monster1group.spawn(Math.random() < 0.5 ? 0 : this.world.width, this.world.randomY)
+      this.monster1group.spawn(Math.random() < 0.5 ? -this.world.width : this.world.width, this.world.randomY)
     } else {
-      this.monster1group.spawn(this.world.randomX, Math.random() < 0.5 ? 0 : this.world.height)
+      this.monster1group.spawn(this.world.randomX, Math.random() < 0.5 ? -this.world.height : this.world.height)
     }
 
     this.nextEnemy = this.game.time.time + this.spawnRate

@@ -19,6 +19,7 @@ export default class extends Phaser.State {
     this.load.spritesheet('monster1', 'assets/images/monster1.png', 64, 64)
     // debug background
     this.load.image('debug-grid', 'assets/images/debug-grid-1920x1920.png')
+    this.load.image('arrow', 'assets/images/arrow.png')
 
     // this.load.onFileComplete.add(this.updateProgressBar, this)
   }

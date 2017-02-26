@@ -31,52 +31,36 @@ export default class Monster1 extends Enemy {
   spawn (x, y) {
     this.stdReset(x, y) // Reset everything from Enemy class
     this.play('move')
-
-    // start in a random direction
-    // if (Math.random() < 0.5) {
-    //   this.body.velocity.x = -this.speed
-    // } else {
-    //   this.body.velocity.x = this.speed
-    // }
   }
 
-  /* The update method will be called automatically by Phaser, just as in the pure Phaser.Sprite class */
   update () {
-    if (!this.stdUpdate()) { return } // Do a standard update from Enemy class to check if update should even be done
-    // this.game.physics.arcade.collide(this, this.game.collisionLayer)
-    // if (this.body.blocked.right) {
-    //   this.scale.x = -1
-    //   this.body.velocity.x = -this.speed
-    // } else if (this.body.blocked.left) {
-    //   this.scale.x = 1
-    //   this.body.velocity.x = this.speed
-    // }
+    if (!this.shoudlUpdate()) { return } // Do a standard update from Enemy class to check if update should even be done
 
-    this.move()
-    // Calculate distance to target
-    // const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
-
-    // if (distance > this.MIN_DISTANCE) {
-    //   // this.attacking = false
-    //   // Calculate the angle to the target
-    //   const rotation = this.game.math.angleBetween(this.x, this.y, this.target.x, this.target.y)
-
-    //   // Calculate velocity vector based on rotation and this.speed
-    //   this.body.velocity.x = Math.cos(rotation) * this.speed
-    //   this.body.velocity.y = Math.sin(rotation) * this.speed
-
-    //   if (this.body.velocity.x > 0) {
-    //     this.scale.x = 1
-    //   } else {
-    //     this.scale.x = -1
-    //   }
-    // } else {
-    //   this.attacking = this.attacking || 'pre-attack'
-    //   this.body.velocity.setTo(0, 0)
-    // }
+    // check if can attack
+    if (this.game.math.distance(this.x, this.y, this.target.x, this.target.y) <= this.attackRange) {
+      this.attack()
+    } else {
+      // nope, let's move!
+      this.move()
+    }
 
     // finally update the animation
     this.checkAnim()
+  }
+
+  checkAnim () {
+    // console.log(`checkAnim: dying:${this.dying}, hurting:${this.hurting}, attacking:${this.attacking}`)
+    // when this.dying, stdUpdate returns false, checkAnim won't be called...
+    // if (this.dying) { return this.play('death') }
+
+    // hurting
+    if (this.hurting) { return this.play('hurt') }
+
+    // attacking
+    if (this.attacking) { return this.play(this.attacking) }
+
+    // else
+    this.play('move')
   }
 
   checkAttackHit () {
@@ -86,5 +70,14 @@ export default class Monster1 extends Enemy {
     if (distance < this.ATTACK_DISTANCE) {
       this.target.hit(this)
     }
+  }
+
+  // @Override death to play animation
+  death () {
+    this.dying = true
+    // we have to play animation here because stdUpdate will return false when dying
+    this.play('death')
+    this.body.velocity.x = 0
+    this.body.velocity.y = 0
   }
 }

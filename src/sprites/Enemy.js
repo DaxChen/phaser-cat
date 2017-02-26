@@ -13,6 +13,10 @@ export default class Enemy extends Phaser.Sprite {
     game.physics.arcade.enable(this)
     // this.body.immovable = true
 
+    // These are the default settings for the enemy, you should override this!
+    this.speed = 60
+    this.ATTACK_RANGE = 48
+
     // this is a collection of bulletUIDs this enemy had hit already
     this.hitBullets = []
 
@@ -45,25 +49,40 @@ export default class Enemy extends Phaser.Sprite {
     this.dying = false
     this.hurting = false // for hurt animation
     this.attacking = false // for attack animation
-    this.sleeping = true // the enemy is sleeping, and will cancel it's update
+    // this.sleeping = true // the enemy is sleeping, and will cancel it's update
     this.hitBullets = []
 
     this.updateDestination()
   }
 
-  /* stdUpdate is called from the enemies' update methods to do generic stuff. If it return false the update loop in the enemy calling stdUpdate should be broken. */
-  stdUpdate () {
+  shouldUpdate () {
     if (!this.exists || this.dying) {
       return false
     }
-    if (this.sleeping) {
-      if (this.inCamera) { // the enemy is within camera, and wakes up and stays awake even outside camera after this.
-        this.sleeping = false
-      }
-      return false
-    }
+    // if (this.sleeping) {
+    //   if (this.inCamera) { // the enemy is within camera, and wakes up and stays awake even outside camera after this.
+    //     this.sleeping = false
+    //   }
+    //   return false
+    // }
     return true // Continue update-loop
   }
+
+  stdUpdate () {
+    if (!this.shouldUpdate()) { return }
+
+    // check if can attack
+    if (this.game.math.distance(this.x, this.y, this.target.x, this.target.y) <= this.ATTACK_RANGE) {
+      this.body.velocity.setTo(0)
+      this.attack()
+    } else {
+      // nope, let's move!
+      this.move()
+    }
+  }
+
+  // you should override this
+  attack () {}
 
   move () {
     if (this.movingState === 'moving') {
@@ -92,19 +111,17 @@ export default class Enemy extends Phaser.Sprite {
     }
 
     // facing
-    if (this.body.velocity.x > 0) {
-      this.scale.x = 1
-    } else {
-      this.scale.x = -1
-    }
+    this.updateRotation()
   }
 
   wait (collisionVectorX, collisionVectorY) {
     this.movingState = 'waiting'
     this.waitingTime = this.game.time.time + 1000 // TODO waitingTime
-    this.body.velocity.setTo(0)
     // turningDirection = originalDirection - PI/2
-    this.turningDirection = Math.atan2(this.body.velocity.y, this.body.velocity.x) - Math.PI / 2
+    // console.log('originally facing', Math.atan2(this.body.velocity.y, this.body.velocity.x) * 180 / Math.PI)
+    this.turningDirection = Math.atan2(this.body.velocity.y, this.body.velocity.x) + Math.PI / 2
+    // console.log('turningDirection', this.turningDirection * 180 / Math.PI)
+    this.body.velocity.setTo(0)
   }
 
   turn () {
@@ -113,6 +130,15 @@ export default class Enemy extends Phaser.Sprite {
       snapToGrid(this.y + Math.sin(this.turningDirection) * gridsize)
     )
     this.movingState = 'moving'
+  }
+
+  // can be override
+  updateRotation () {
+    if (this.body.velocity.x > 0) {
+      this.scale.x = 1
+    } else {
+      this.scale.x = -1
+    }
   }
 
   updateDestination () {
@@ -156,27 +182,8 @@ export default class Enemy extends Phaser.Sprite {
     // }
 
     if (this.health <= 0) {
-      this.dying = true
-      // we have to play animation here because stdUpdate will return false when dying
-      this.play('death')
-      this.body.velocity.x = 0
-      this.body.velocity.y = 0
+      this.death()
     }
-  }
-
-  checkAnim () {
-    // console.log(`checkAnim: dying:${this.dying}, hurting:${this.hurting}, attacking:${this.attacking}`)
-    // when this.dying, stdUpdate returns false, checkAnim won't be called...
-    // if (this.dying) { return this.play('death') }
-
-    // hurting
-    if (this.hurting) { return this.play('hurt') }
-
-    // attacking
-    if (this.attacking) { return this.play(this.attacking) }
-
-    // else
-    this.play('move')
   }
 
   death () {
