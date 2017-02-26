@@ -35,12 +35,13 @@ export default class Game extends Phaser.State {
     // // resizes the game world to match the layer dimensions
     // this.backgroundlayer.resizeWorld();
 
-    this.player = new CatFighter({
-      game: this.game,
-      x: this.world.centerX,
-      y: this.world.centerY,
-      asset: 'cat'
-    })
+    // world bounds
+    this.game.add.tileSprite(-960, -960, 1920, 1920, 'debug-grid')
+    this.game.world.setBounds(-960, -960, 1920, 1920)
+
+    this.player = new CatFighter({ game: this.game, x: 0, y: 0, asset: 'cat' })
+    this.game.add.existing(this.player)
+    this.game.camera.follow(this.player/* , Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1 */)
 
     // bullets
     this.singleBullets = [
@@ -52,8 +53,6 @@ export default class Game extends Phaser.State {
     this.penetrableBullets = [
       this.player.weapons.fireballSuper.bullets
     ]
-
-    this.game.add.existing(this.player)
 
     this.monster1group = new Monster1Group({ game: this.game, target: this.player })
     // this.monster1group.spawn(100, 200)
@@ -75,7 +74,7 @@ export default class Game extends Phaser.State {
   }
 
   update () {
-    this.spawnEnemies()
+    // this.spawnEnemies()
     this.game.physics.arcade.overlap(this.singleBullets, this.monster1group, (bullet, enemy) => {
       if (!bullet.dying) {
         enemy.hit(bullet)
@@ -89,7 +88,23 @@ export default class Game extends Phaser.State {
     this.game.physics.arcade.overlap(this.penetrableBullets, this.monster1group, (bullet, enemy) => {
       enemy.hit(bullet)
     })
-    this.game.physics.arcade.collide(this.monster1group, this.monster1group)
+    this.game.physics.arcade.collide(this.monster1group, this.monster1group, (enemy1, enemy2) => {
+      // line of centers determine the collision direction
+      // start with enemy1 perspective
+      let collisionVectorX = enemy2.x - enemy1.x
+      let collisionVectorY = enemy2.y - enemy1.y
+      if (collisionVectorX * enemy1.body.velocity.x + collisionVectorY * enemy1.body.velocity.y > 0) {
+        // this is acute angle, should stop
+        enemy1.wait(collisionVectorX, collisionVectorY)
+      }
+      // now enemy2 perspective, reverse collisionVector
+      collisionVectorX *= -1
+      collisionVectorY *= -1
+      if (collisionVectorX * enemy2.body.velocity.x + collisionVectorY * enemy2.body.velocity.y > 0) {
+        // this is acute angle, should stop
+        enemy2.wait(collisionVectorX, collisionVectorY)
+      }
+    })
     this.game.physics.arcade.collide(this.monster1group, this.player)
   }
 
@@ -107,6 +122,8 @@ export default class Game extends Phaser.State {
 
   render () {
     if (__DEV__) {
+      this.game.debug.cameraInfo(this.game.camera, 32, 32)
+      this.game.debug.spriteCoords(this.player, 32, 500)
       // this.game.debug.spriteInfo(this.player, 32, 32)
       // this.player.weapons.fireball.debug(32, 32/* , true */)
       // this.game.debug.bodyInfo(this.player, 32, 32)

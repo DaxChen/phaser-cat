@@ -26,7 +26,7 @@ export default class CatFighter extends Phaser.Sprite {
     this.speed = 150
 
     // direction is calculated via `Math.atan2`, with the following results:
-    // east: 0, north: -90, west: 180, south: 90
+    // east: 0, north: -90, west: 180, south: 90 this is so wrong... Math.atan2 is (Y, X) not (X, Y)
     // north-east: -45, north-west: -135, south-east: 45, south-west: 135
     this.direction = 0
 

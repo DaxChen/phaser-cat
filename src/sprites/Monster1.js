@@ -52,27 +52,28 @@ export default class Monster1 extends Enemy {
     //   this.body.velocity.x = this.speed
     // }
 
+    this.move()
     // Calculate distance to target
-    const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
+    // const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
 
-    if (distance > this.MIN_DISTANCE) {
-      // this.attacking = false
-      // Calculate the angle to the target
-      const rotation = this.game.math.angleBetween(this.x, this.y, this.target.x, this.target.y)
+    // if (distance > this.MIN_DISTANCE) {
+    //   // this.attacking = false
+    //   // Calculate the angle to the target
+    //   const rotation = this.game.math.angleBetween(this.x, this.y, this.target.x, this.target.y)
 
-      // Calculate velocity vector based on rotation and this.speed
-      this.body.velocity.x = Math.cos(rotation) * this.speed
-      this.body.velocity.y = Math.sin(rotation) * this.speed
+    //   // Calculate velocity vector based on rotation and this.speed
+    //   this.body.velocity.x = Math.cos(rotation) * this.speed
+    //   this.body.velocity.y = Math.sin(rotation) * this.speed
 
-      if (this.body.velocity.x > 0) {
-        this.scale.x = 1
-      } else {
-        this.scale.x = -1
-      }
-    } else {
-      this.attacking = this.attacking || 'pre-attack'
-      this.body.velocity.setTo(0, 0)
-    }
+    //   if (this.body.velocity.x > 0) {
+    //     this.scale.x = 1
+    //   } else {
+    //     this.scale.x = -1
+    //   }
+    // } else {
+    //   this.attacking = this.attacking || 'pre-attack'
+    //   this.body.velocity.setTo(0, 0)
+    // }
 
     // finally update the animation
     this.checkAnim()
