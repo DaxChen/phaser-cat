@@ -6,6 +6,7 @@ var phaserModule = path.join(__dirname, '/node_modules/phaser-ce/')
 var phaser = path.join(phaserModule, 'build/custom/phaser-split.js')
 var pixi = path.join(phaserModule, 'build/custom/pixi.js')
 var p2 = path.join(phaserModule, 'build/custom/p2.js')
+var box2d = path.join(__dirname, 'libs/box2d/scrambled/box2d-plugin-full.js')
 
 var definePlugin = new webpack.DefinePlugin({
   __DEV__: JSON.stringify(JSON.parse(process.env.BUILD_DEV || 'false'))
@@ -17,7 +18,7 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src/main.js')
     ],
-    vendor: ['pixi', 'p2', 'phaser', 'webfontloader']
+    vendor: ['pixi', 'p2', 'phaser', 'box2d', 'webfontloader']
 
   },
   output: {
@@ -42,7 +43,8 @@ module.exports = {
       { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
       { test: /pixi\.js/, use: ['expose-loader?PIXI'] },
       { test: /phaser-split\.js$/, use: ['expose-loader?Phaser'] },
-      { test: /p2\.js/, use: ['expose-loader?p2'] }
+      { test: /p2\.js/, use: ['expose-loader?p2'] },
+      { test: box2d, use: ['imports-loader?this=>window'] }
     ]
   },
   node: {
@@ -54,7 +56,8 @@ module.exports = {
     alias: {
       'phaser': phaser,
       'pixi': pixi,
-      'p2': p2
+      'p2': p2,
+      'box2d': box2d
     }
   }
 }
