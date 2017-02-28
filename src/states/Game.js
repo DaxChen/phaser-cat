@@ -20,20 +20,10 @@ export default class Game extends Phaser.State {
     banner.smoothed = false
     banner.anchor.setTo(0.5)
 
-    // // map
-    // // this.map = this.game.add.tilemap('level1')
-    // // the first parameter is the tileset name as specified in Tiled, the second is the key to the asset
-    // this.map.addTilesetImage('tiles', 'gameTiles');
-
-    // // create layer
-    // this.backgroundlayer = this.map.createLayer('backgroundLayer');
-    // this.blockedLayer = this.map.createLayer('blockedLayer');
-
-    // // collision on blockedLayer
-    // this.map.setCollisionBetween(1, 100000, true, 'blockedLayer');
-
-    // // resizes the game world to match the layer dimensions
-    // this.backgroundlayer.resizeWorld();
+    // world bounds
+    this.game.add.tileSprite(0, 0, 1920, 1920, 'debug-grid')
+    this.game.world.setBounds(0, 0, 1920, 1920)
+    this.game.physics.box2d.setBoundsToWorld()
 
     this.player = new CatFighter({
       game: this.game,
@@ -41,56 +31,28 @@ export default class Game extends Phaser.State {
       y: this.world.centerY,
       asset: 'cat'
     })
+    this.game.add.existing(this.player)
+    this.game.camera.follow(this.player/* , Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1 */)
 
     // bullets
-    this.singleBullets = [
-      this.player.weapons.fireballNormal.bullets
-    ]
-    this.splashBullets = [
-      this.player.weapons.fireballCharged.bullets
-    ]
-    this.penetrableBullets = [
-      this.player.weapons.fireballSuper.bullets
-    ]
+    // this.singleBullets = [
+    //   this.player.weapons.fireballNormal.bullets
+    // ]
+    // this.splashBullets = [
+    //   this.player.weapons.fireballCharged.bullets
+    // ]
+    // this.penetrableBullets = [
+    //   this.player.weapons.fireballSuper.bullets
+    // ]
 
-    this.game.add.existing(this.player)
-
-    this.monster1group = new Monster1Group({ game: this.game, target: this.player })
+    // this.monster1group = new Monster1Group({ game: this.game, target: this.player })
     // this.monster1group.spawn(100, 200)
-    this.nextEnemy = 0
-    this.spawnRate = 3000
-
-    // debug body sizes
-    // this.debugMonster1 = this.game.add.sprite(100, 100, 'monster1')
-    // this.debugMonster1.animations.add('move', [0, 1, 2, 3, 4], 2, true)
-    // this.debugMonster1.animations.add('attack', [8, 9, 10, 11, 12], 2, true)
-    // this.debugMonster1.play('attack')
-    // this.game.physics.arcade.enable(this.debugMonster1)
-    // this.debugMonster1.body.setSize(25, 24, 19, 26)
-    // this.debugFireball = this.game.add.sprite(100, 200, 'fireball_super')
-    // this.debugFireball.animations.add('fly', [0, 1, 2, 3], 2, true)
-    // this.debugFireball.animations.play('fly')
-    // this.game.physics.arcade.enable(this.debugFireball)
-    // this.debugFireball.body.setSize(16, 46, 26, 10)
+    // this.nextEnemy = 0
+    // this.spawnRate = 3000
   }
 
   update () {
-    this.spawnEnemies()
-    this.game.physics.arcade.overlap(this.singleBullets, this.monster1group, (bullet, enemy) => {
-      if (!bullet.dying) {
-        enemy.hit(bullet)
-        bullet.kill()
-      }
-    })
-    this.game.physics.arcade.overlap(this.splashBullets, this.monster1group, (bullet, enemy) => {
-      enemy.hit(bullet)
-      if (!bullet.dying) { bullet.kill() }
-    })
-    this.game.physics.arcade.overlap(this.penetrableBullets, this.monster1group, (bullet, enemy) => {
-      enemy.hit(bullet)
-    })
-    this.game.physics.arcade.collide(this.monster1group, this.monster1group)
-    this.game.physics.arcade.collide(this.monster1group, this.player)
+    // this.spawnEnemies()
   }
 
   spawnEnemies () {
@@ -114,6 +76,7 @@ export default class Game extends Phaser.State {
       // this.game.debug.body(this.debugMonster1)
       // this.game.debug.body(this.debugFireball)
       // this.game.debug.spriteInfo(this.monster1group)
+      this.game.debug.box2dWorld()
     }
   }
 }

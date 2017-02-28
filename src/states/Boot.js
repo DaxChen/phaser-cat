@@ -48,7 +48,7 @@ export default class extends Phaser.State {
     this.scale.pageAlignVertically = true
 
     // physics system
-    this.game.physics.startSystem(Phaser.Physics.ARCADE)
+    this.game.physics.startSystem(Phaser.Physics.BOX2D)
   }
 
   render () {
