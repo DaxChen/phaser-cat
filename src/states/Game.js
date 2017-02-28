@@ -1,8 +1,8 @@
 /* globals __DEV__ */
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
-// import Monster1Group from '../sprites/Monster1Group'
-import DebugEnemyGroup from '../sprites/DebugEnemyGroup'
+import Monster1Group from '../sprites/Monster1Group'
+// import DebugEnemyGroup from '../sprites/DebugEnemyGroup'
 
 export default class Game extends Phaser.State {
   init () {
@@ -55,11 +55,11 @@ export default class Game extends Phaser.State {
       this.player.weapons.fireballSuper.bullets
     ]
 
-    // this.monster1group = new Monster1Group({ game: this.game, target: this.player })
-    this.monster1group = new DebugEnemyGroup({ game: this.game, target: this.player })
+    this.monster1group = new Monster1Group({ game: this.game, target: this.player })
+    // this.monster1group = new DebugEnemyGroup({ game: this.game, target: this.player })
     // this.monster1group.spawn(100, 200)
     this.nextEnemy = 0
-    this.spawnRate = 3000
+    this.spawnRate = 300000
 
     // debug body sizes
     // this.debugMonster1 = this.game.add.sprite(100, 100, 'monster1')

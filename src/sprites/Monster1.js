@@ -16,13 +16,12 @@ export default class Monster1 extends Enemy {
     this.animations.add('hurt', [17, 18, 17], 12, false)
       .onComplete.add(() => { this.hurting = false })
     this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false)
-      .onComplete.add(this.death, this)
+      .onComplete.add(() => { this.exists = false })
 
     // settings
     this.body.setSize(25, 24, 19, 26)
     this.speed = 60
-    this.MIN_DISTANCE = 32
-    this.ATTACK_DISTANCE = this.MIN_DISTANCE + 2
+    this.ATTACK_RANGE = 32
     this.ATK = 10
     this.maxHealth = 20
     this.setHealth(20)
@@ -34,10 +33,12 @@ export default class Monster1 extends Enemy {
   }
 
   update () {
-    if (!this.shoudlUpdate()) { return } // Do a standard update from Enemy class to check if update should even be done
+    if (!this.shouldUpdate()) { return } // Do a standard update from Enemy class to check if update should even be done
 
     // check if can attack
-    if (this.game.math.distance(this.x, this.y, this.target.x, this.target.y) <= this.attackRange) {
+    console.log(Math.round(this.game.math.distance(this.x, this.y, this.target.x, this.target.y)), this.ATTACK_RANGE)
+    if (this.game.math.distance(this.x, this.y, this.target.x, this.target.y) <= this.ATTACK_RANGE) {
+      this.body.velocity.setTo(0)
       this.attack()
     } else {
       // nope, let's move!
@@ -46,6 +47,9 @@ export default class Monster1 extends Enemy {
 
     // finally update the animation
     this.checkAnim()
+  }
+
+  attack () {
   }
 
   checkAnim () {
@@ -67,7 +71,7 @@ export default class Monster1 extends Enemy {
     const distance = this.game.math.distance(this.x, this.y, this.target.x, this.target.y)
 
     // check if the distance is less than attack distance
-    if (distance < this.ATTACK_DISTANCE) {
+    if (distance < this.ATTACK_RANGE + 3) { // TODO the offset 3
       this.target.hit(this)
     }
   }
