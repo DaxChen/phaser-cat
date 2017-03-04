@@ -5,14 +5,19 @@ export default class Enemy extends Phaser.Sprite {
 
   constructor ({ game, asset }) {
     super(game, 0, 0, asset)
-    this.exists = false
-    this.anchor.setTo(0.5)
-    // body
-    game.physics.arcade.enable(this)
-    // this.body.immovable = true
+    // physics
+    game.physics.box2d.enable(this)
+    this.kill()
+    this.body.kill()
+    this.body.fixedRotation = true
 
-    // this is a collection of bulletUIDs this enemy had hit already
-    this.hitBullets = []
+    // default settings of enemy, you should override these
+    this.MOVE_SPEED = 100
+    this.ATTACK_RANGE = 40
+
+    // some variables
+    this.hitBullets = [] // this is a collection of bulletUIDs this enemy had hit already
+    this.target = null // the target currently chasing/attacking
 
     // some states
     this.dying = false // for death animation
@@ -23,68 +28,33 @@ export default class Enemy extends Phaser.Sprite {
   /* Standard reset is called from the spawn-function (se example enemy later in the tutorial */
   stdReset (x, y) {
     this.reset(x, y, this.maxHealth)
-    // this.frozen = false
-    // this.energy = this.maxHealth
-    this.exists = true
     this.dying = false
     this.hurting = false // for hurt animation
     this.attacking = false // for attack animation
-    this.sleeping = true // the enemy is sleeping, and will cancel it's update
     this.hitBullets = []
+    this.updateTarget() // TODO do we need this?
   }
 
-  /* stdUpdate is called from the enemies' update methods to do generic stuff. If it return false the update loop in the enemy calling stdUpdate should be broken. */
+  shouldUpdate () {
+    return this.exists
+  }
+
   stdUpdate () {
-    if (!this.exists || this.dying) {
-      return false
-    }
-    if (this.sleeping) {
-      if (this.inCamera) { // the enemy is within camera, and wakes up and stays awake even outside camera after this.
-        this.sleeping = false
-      }
-      return false
-    }
-    return true // Continue update-loop
-  }
+    if (!this.shouldUpdate()) { return }
 
-  hit (bullet) {
-    if (this.dying) { // While the enemy sprite plays it's death animation it should ignore all bullets
-      return
-    }
-    // check bulletUID
-    if (!bullet.bulletUID) { return console.error('no bulletUID') }
-    if (this.hitBullets.indexOf(bullet.bulletUID) >= 0) { return } // already hit by this
-    // add to hitBullets
-    this.hitBullets.push(bullet.bulletUID)
-
-    // if (bullet.type === 'ice' && !this.frozen) { // Ice will freeze if not frozen, but defrost if the enemy is frozen
-    //   this.frozen = true
-    //   this.play('frozen')
-    // } else {
-      // this.frozen = false // I don't care about resetting animation, this should be done by the enemy itself in its now continued update loop
-      // this.health -= this.vulnerabilities[bullet.type]
-    this.hurting = true
-
-    this.health -= bulletATK[bullet.key]
-    // console.log(this.health + '/' + this.maxHealth)
-      // if (this.vulnerabilities[bullet.type] === 0) { // A metallic 'klonk' when there is no damage
-      //   // this.game.sound.play('ricochetShort')
-      // }
-    // }
-
-    if (this.health <= 0) {
-      this.dying = true
-      // we have to play animation here because stdUpdate will return false when dying
-      this.play('death')
-      this.body.velocity.x = 0
-      this.body.velocity.y = 0
+    // check if can attack
+    if (this.game.math.distance(this.x, this.y, this.target.x, this.target.y) <= this.ATTACK_RANGE) {
+      this.stop()
+      this.attack()
+    } else {
+      // nope, let's move!
+      this.move()
     }
   }
 
-  checkAnim () {
-    // console.log(`checkAnim: dying:${this.dying}, hurting:${this.hurting}, attacking:${this.attacking}`)
-    // when this.dying, stdUpdate returns false, checkAnim won't be called...
-    // if (this.dying) { return this.play('death') }
+  stdCheckAnim () {
+    // dying
+    if (this.dying) { return this.play('death') }
 
     // hurting
     if (this.hurting) { return this.play('hurt') }
@@ -96,7 +66,60 @@ export default class Enemy extends Phaser.Sprite {
     this.play('move')
   }
 
+  updateRotation () {
+    if (this.body.velocity.x > 0) {
+      this.scale.x = this.scale.x < 0 ? -this.scale.x : this.scale.x
+    } else {
+      this.scale.x = this.scale.x < 0 ? this.scale.x : -this.scale.x
+    }
+  }
+
+  updateTarget () {
+    this.target = this.game.state.states.Game.player // TODO find closest player when doing multiplayer
+  }
+
+  /**************************************************
+  *    ACTIONS (move, stop, attack, hit, etc.)
+  **************************************************/
+  move () {
+    const rotation = this.game.math.angleBetween(this.x, this.y, this.target.x, this.target.y)
+
+    // Calculate velocity vector based on rotation and this.speed
+    this.body.velocity.x = Math.cos(rotation) * this.MOVE_SPEED
+    this.body.velocity.y = Math.sin(rotation) * this.MOVE_SPEED
+
+    this.updateRotation()
+  }
+
+  stop () {
+    this.body.setZeroVelocity()
+  }
+
+  attack () {}
+
+  hit (bullet) {
+    if (this.dying) { // While the enemy sprite plays it's death animation it should ignore all bullets
+      return
+    }
+    // check bulletUID
+    if (!bullet.bulletUID) { return console.error('no bulletUID') }
+    if (this.hitBullets.indexOf(bullet.bulletUID) >= 0) { return } // already hit by this
+    // add to hitBullets
+    this.hitBullets.push(bullet.bulletUID)
+
+    this.hurting = true
+
+    this.health -= bulletATK[bullet.key]
+    // console.log(this.health + '/' + this.maxHealth)
+
+    if (this.health <= 0) {
+      this.stop()
+      this.death() // we call death here, if you have dying animation, override the death method
+    }
+  }
+
   death () {
-    this.exists = false
+    this.kill()
+    this.body.kill()
   }
 }

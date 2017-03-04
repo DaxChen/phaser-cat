@@ -45,14 +45,13 @@ export default class Game extends Phaser.State {
     //   this.player.weapons.fireballSuper.bullets
     // ]
 
-    // this.monster1group = new Monster1Group({ game: this.game, target: this.player })
-    // this.monster1group.spawn(100, 200)
-    // this.nextEnemy = 0
-    // this.spawnRate = 3000
+    this.monster1group = new Monster1Group({ game: this.game })
+    this.nextEnemy = 0
+    this.spawnRate = 3000
   }
 
   update () {
-    // this.spawnEnemies()
+    this.spawnEnemies()
   }
 
   spawnEnemies () {

@@ -16,6 +16,7 @@ export default class CatFighter extends Phaser.Sprite {
     //  enable physics on the player
     game.physics.box2d.enable(this)
     this.body.setRectangle(13, 28, -1, 8)
+    this.body.fixedRotation = true
 
     // animations
     this.initAnimations()
@@ -178,14 +179,14 @@ export default class CatFighter extends Phaser.Sprite {
   }
 
   hit (enemy) {
-    // if (this.invincible) { return }
+    if (this.invincible) { return }
 
-    // this.hurting = true
-    // this.health -= enemy.ATK - this.DEF
-    // updateHealthBar(this)
-    // if (this.health <= 0) {
-    //   this.dying = true
-    // }
+    this.hurting = true
+    this.health -= enemy.ATK - this.DEF
+    updateHealthBar(this)
+    if (this.health <= 0) {
+      this.dying = true
+    }
   }
 
   myReset (x, y) {
