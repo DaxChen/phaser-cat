@@ -4,9 +4,9 @@ import {
   invincibleTimer,
   updateHealthBar
 } from '../utils/player-util'
+import { getBulletUID } from '../weapons/weapon-config'
 
 export default class CatFighter extends Phaser.Sprite {
-
   constructor ({ game, x, y, asset }) {
     super(game, x, y, asset)
 
@@ -45,7 +45,6 @@ export default class CatFighter extends Phaser.Sprite {
     // weapons
     this.currentWeapon = 'fireball'
     this.weapons = {}
-    this.initFireball()
 
     // setup initial invincible timer
     invincibleTimer({ game, player: this })
@@ -85,7 +84,10 @@ export default class CatFighter extends Phaser.Sprite {
     this.animations.add('fireball-shot-super', [89, 90, 91, 92, 93, 94], 12, false)
       .onComplete.add(fireballShotOnComplete)
   }
-  initFireball () {
+
+  addWeapon (name, weapon) {
+    this.weapons[name] = weapon
+    weapon.trackedSprite = this
   }
 
   checkAnim () {
@@ -163,16 +165,29 @@ export default class CatFighter extends Phaser.Sprite {
       type = chargeTime > this.FIREBALL_SUPER_CHARGE_TIME ? 'fireballSuper' : 'fireballCharged'
     }
 
-    // this.weapons[type].fireAngle = this.direction
-    // this.weapons[type].trackOffset.x = 0
+    this.weapons[type].fireAngle = this.direction
+
+    // trackOffset
+    this.weapons[type].trackOffset.x = 0
+    this.weapons[type].trackOffset.y = 0
     if (this.direction <= 45 && this.direction >= -45) {
-      // this.weapons[type].trackOffset.x = 10
+      // right
+      this.weapons[type].trackOffset.x = 10
     } else if (this.direction <= -135 || this.direction >= 135) {
-      // this.weapons[type].trackOffset.x = -10
+      // left
+      this.weapons[type].trackOffset.x = -10
     }
-    // const bullet = this.weapons[type].fire()
-    // // bullet can be fales or null if not enough time has expired since the last fire
-    // if (bullet) { bullet.bulletUID = getBulletUID() }
+    if (this.direction >= 45 && this.direction <= 135) {
+      // down
+      this.weapons[type].trackOffset.y = 10
+    } else if (this.direction <= -45 && this.direction >= -135) {
+      // up
+      this.weapons[type].trackOffset.y = -10
+    }
+
+    const bullet = this.weapons[type].fire()
+    // bullet can be fales or null if not enough time has expired since the last fire
+    if (bullet) { bullet.bulletUID = getBulletUID() }
 
     // update animation
     this.fireballChargeState = type === 'fireballSuper' ? 'shot-super' : 'shot'

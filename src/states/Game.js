@@ -2,6 +2,7 @@
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
 import Monster1Group from '../sprites/Monster1Group'
+import FireballNormal from '../weapons/FireballNormal'
 
 export default class Game extends Phaser.State {
   init () {
@@ -34,6 +35,9 @@ export default class Game extends Phaser.State {
     this.game.add.existing(this.player)
     this.game.camera.follow(this.player/* , Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1 */)
 
+    // weapon
+    this.initWeapons()
+
     // bullets
     // this.singleBullets = [
     //   this.player.weapons.fireballNormal.bullets
@@ -50,8 +54,12 @@ export default class Game extends Phaser.State {
     this.spawnRate = 3000
   }
 
+  initWeapons () {
+    this.player.addWeapon('fireballNormal', new FireballNormal({ game: this.game }))
+  }
+
   update () {
-    this.spawnEnemies()
+    // this.spawnEnemies()
   }
 
   spawnEnemies () {
