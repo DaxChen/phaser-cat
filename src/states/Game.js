@@ -59,7 +59,7 @@ export default class Game extends Phaser.State {
   }
 
   update () {
-    // this.spawnEnemies()
+    this.spawnEnemies()
   }
 
   spawnEnemies () {

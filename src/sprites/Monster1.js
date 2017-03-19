@@ -1,11 +1,13 @@
 import Enemy from './Enemy'
+import { CATEGORY_ENEMY } from '../config'
 
 export default class Monster1 extends Enemy {
   constructor ({ game }) {
     super({ game, asset: 'monster1' })
 
     // physics
-    this.body.setCircle(13, 0, 3)
+    this.body.setCircle(13, 0, 3) // this resets `setCollisionCategory`, so let's call it again
+    this.body.setCollisionCategory(CATEGORY_ENEMY)
 
     // configs
     this.MOVE_SPEED = 100

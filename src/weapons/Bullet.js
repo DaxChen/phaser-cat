@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 import PIXI from 'pixi'
+import { CATEGORY_ENEMY, CATEGORY_BULLET } from '../config'
+import { getBulletUID } from './weapon-config'
 
 export default class Bullet extends Phaser.Sprite {
   constructor ({ game, asset }) {
@@ -10,8 +12,9 @@ export default class Bullet extends Phaser.Sprite {
     // physics
     game.physics.box2d.enable(this)
     this.body.fixedRotation = true
-    this.body.setCollisionCategory(2) // this is a bitmask
-    this.body.sensor = true // TODO ?????
+    this.body.setCollisionCategory(CATEGORY_BULLET)
+    // this.body.bullet = true
+    // this.body.sensor = true
 
     // kill
     this.alive = false
@@ -25,20 +28,25 @@ export default class Bullet extends Phaser.Sprite {
 
     this.data = {
       bulletManager: null,
+      bulletUID: null,
       fromX: 0,
       fromY: 0,
       // bodyDirty: true,
       rotateToVelocity: true,
       killType: Phaser.Weapon.KILL_DISTANCE,
-      killDistance: 800
+      killDistance: 400
     }
+
+    // contact callbacks
+    this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
   }
 
   kill () {
+    this.body.kill()
     this.alive = false
     this.exists = false
     this.visible = false
-    this.body.kill()
+    this.data.bulletUID = null
 
     this.data.bulletManager.onKill.dispatch(this)
 
@@ -50,7 +58,7 @@ export default class Bullet extends Phaser.Sprite {
     gy = gy || 0
 
     this.reset(x, y)
-    this.scale.set(1)
+    // this.scale.set(1)
 
     // although we are using Box2D physics, this helper method is still okay!
     const v = this.game.physics.arcade.velocityFromAngle(angle, speed)
@@ -65,6 +73,7 @@ export default class Bullet extends Phaser.Sprite {
     }
 
     // this.body.gravity.set(gx, gy)
+    this.data.bulletUID = getBulletUID()
   }
 
   update () {
@@ -90,5 +99,22 @@ export default class Bullet extends Phaser.Sprite {
     //   this.scale.x += this.scaleSpeed
     //   this.scale.y += this.scaleSpeed
     // }
+  }
+
+  // body1 is the bullet, body2 is the enemy. use body1.sprite, body2.sprite to get sprite
+  hitEnemy (body1, body2, fixture1, fixture2, begin) {
+    if (!begin) { return }
+
+    if (body2.sprite) {
+      body2.sprite.hit(body1.sprite)
+    }
+
+    // It is possible for the bullet to collide with more than one tile body
+    // in the same timestep, in which case this will run twice, so we need to
+    // check if the sprite has already been destroyed.
+    if (body1.sprite) {
+      this.kill()
+      // this.destroy()
+    }
   }
 }

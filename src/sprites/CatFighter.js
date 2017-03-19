@@ -162,7 +162,7 @@ export default class CatFighter extends Phaser.Sprite {
   fireFireball (chargeTime) {
     let type = 'fireballNormal'
     if (this.fireballChargeState !== 'ready') {
-      type = chargeTime > this.FIREBALL_SUPER_CHARGE_TIME ? 'fireballSuper' : 'fireballCharged'
+      // type = chargeTime > this.FIREBALL_SUPER_CHARGE_TIME ? 'fireballSuper' : 'fireballCharged'
     }
 
     this.weapons[type].fireAngle = this.direction

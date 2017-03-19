@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { ATK as bulletATK } from '../weapons/weapon-config'
+import { CATEGORY_ENEMY } from '../config'
 
 export default class Enemy extends Phaser.Sprite {
 
@@ -7,9 +8,10 @@ export default class Enemy extends Phaser.Sprite {
     super(game, 0, 0, asset)
     // physics
     game.physics.box2d.enable(this)
+    this.body.setCollisionCategory(CATEGORY_ENEMY)
+    this.body.fixedRotation = true
     this.kill()
     this.body.kill()
-    this.body.fixedRotation = true
 
     // default settings of enemy, you should override these
     this.MOVE_SPEED = 100
@@ -102,10 +104,10 @@ export default class Enemy extends Phaser.Sprite {
       return
     }
     // check bulletUID
-    if (!bullet.bulletUID) { return console.error('no bulletUID') }
-    if (this.hitBullets.indexOf(bullet.bulletUID) >= 0) { return } // already hit by this
+    if (!bullet.data.bulletUID) { return console.error('no bulletUID') }
+    if (this.hitBullets.indexOf(bullet.data.bulletUID) >= 0) { return } // already hit by this
     // add to hitBullets
-    this.hitBullets.push(bullet.bulletUID)
+    this.hitBullets.push(bullet.data.bulletUID)
 
     this.hurting = true
 
