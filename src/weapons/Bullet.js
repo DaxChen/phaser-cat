@@ -11,6 +11,9 @@ export default class Bullet extends Phaser.Sprite {
 
     // this physics part of is all moved to resetBody, called in reset
 
+    // states
+    this.dying = false
+
     // kill
     this.alive = false
     this.exists = false
@@ -28,7 +31,8 @@ export default class Bullet extends Phaser.Sprite {
       // bodyDirty: true,
       rotateToVelocity: true,
       killType: Phaser.Weapon.KILL_DISTANCE,
-      killDistance: 400
+      killDistance: 400,
+      flyAnim: ''
     }
   }
 
@@ -45,17 +49,39 @@ export default class Bullet extends Phaser.Sprite {
     this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
   }
 
+  resetAnim () {
+    if (this.data.flyAnim) {
+      this.play(this.data.flyAnim)
+    }
+  }
+
   reset (x, y, health) {
     Phaser.Sprite.prototype.reset.call(this, x, y, health)
 
     this.resetBody()
 
+    this.resetAnim()
+
+    this.dying = false
+
     return this
   }
 
+  // override this to add animations
+  preKill () {
+    this.dying = true
+    this.kill()
+  }
+
+  killBody () {
+    if (this.body) {
+      this.body.destroy()
+      this.body = null
+    }
+  }
+
   kill () {
-    this.body.destroy()
-    this.body = null
+    this.killBody()
 
     this.alive = false
     this.exists = false
@@ -91,17 +117,17 @@ export default class Bullet extends Phaser.Sprite {
   }
 
   update () {
-    if (!this.exists) { return }
+    if (!this.exists || this.dying) { return }
 
     if (this.data.killType > Phaser.Weapon.KILL_LIFESPAN) {
       if (this.data.killType === Phaser.Weapon.KILL_DISTANCE) {
         if (this.game.physics.arcade.distanceToXY(this, this.data.fromX, this.data.fromY, true) > this.data.killDistance) {
-          this.kill()
+          this.preKill()
           return
         }
       } else {
         if (!this.data.bulletManager.bulletBounds.intersects(this)) {
-          this.kill()
+          this.preKill()
           return
         }
       }
@@ -120,6 +146,7 @@ export default class Bullet extends Phaser.Sprite {
   // body1 is the bullet, body2 is the enemy. use body1.sprite, body2.sprite to get sprite
   hitEnemy (body1, body2, fixture1, fixture2, begin) {
     if (!begin) { return }
+    console.log('hit')
 
     if (body2.sprite) {
       body2.sprite.hit(body1.sprite)
@@ -129,8 +156,7 @@ export default class Bullet extends Phaser.Sprite {
     // in the same timestep, in which case this will run twice, so we need to
     // check if the sprite has already been destroyed.
     if (body1.sprite) {
-      this.kill()
-      // this.destroy()
+      this.preKill()
     }
   }
 }
