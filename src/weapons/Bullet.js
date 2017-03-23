@@ -10,11 +10,7 @@ export default class Bullet extends Phaser.Sprite {
     this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST
 
     // physics
-    game.physics.box2d.enable(this)
-    this.body.fixedRotation = true
-    this.body.setCollisionCategory(CATEGORY_BULLET)
-    // this.body.bullet = true
-    // this.body.sensor = true
+    this.resetBody()
 
     // kill
     this.alive = false
@@ -36,13 +32,33 @@ export default class Bullet extends Phaser.Sprite {
       killType: Phaser.Weapon.KILL_DISTANCE,
       killDistance: 400
     }
+  }
+
+  resetBody () {
+    if (!this.body) {
+      this.game.physics.box2d.enable(this)
+    }
+    this.body.fixedRotation = true
+    this.body.setCollisionCategory(CATEGORY_BULLET)
+    // this.body.bullet = true
+    // this.body.sensor = true
 
     // contact callbacks
     this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
   }
 
+  reset (x, y, health) {
+    Phaser.Sprite.prototype.reset.call(this, x, y, health)
+
+    this.resetBody()
+
+    return this
+  }
+
   kill () {
-    this.body.kill()
+    this.body.destroy()
+    this.body = null
+
     this.alive = false
     this.exists = false
     this.visible = false
@@ -83,10 +99,12 @@ export default class Bullet extends Phaser.Sprite {
       if (this.data.killType === Phaser.Weapon.KILL_DISTANCE) {
         if (this.game.physics.arcade.distanceToXY(this, this.data.fromX, this.data.fromY, true) > this.data.killDistance) {
           this.kill()
+          return
         }
       } else {
         if (!this.data.bulletManager.bulletBounds.intersects(this)) {
           this.kill()
+          return
         }
       }
     }

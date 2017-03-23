@@ -100,7 +100,7 @@ export default class Enemy extends Phaser.Sprite {
   attack () {}
 
   hit (bullet) {
-    if (this.dying) { // While the enemy sprite plays it's death animation it should ignore all bullets
+    if (!bullet || this.dying) { // While the enemy sprite plays it's death animation it should ignore all bullets
       return
     }
     // check bulletUID
@@ -116,6 +116,7 @@ export default class Enemy extends Phaser.Sprite {
 
     if (this.health <= 0) {
       this.stop()
+      this.body.kill()
       this.death() // we call death here, if you have dying animation, override the death method
     }
   }
