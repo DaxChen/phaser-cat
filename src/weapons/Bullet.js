@@ -9,14 +9,12 @@ export default class Bullet extends Phaser.Sprite {
 
     this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST
 
-    // physics
-    this.resetBody()
+    // this physics part of is all moved to resetBody, called in reset
 
     // kill
     this.alive = false
     this.exists = false
     this.visible = false
-    this.body.kill()
 
     // these are relative expensive
     // this.checkWorldBounds = true

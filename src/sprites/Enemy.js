@@ -6,12 +6,8 @@ export default class Enemy extends Phaser.Sprite {
 
   constructor ({ game, asset }) {
     super(game, 0, 0, asset)
-    // physics
-    game.physics.box2d.enable(this)
-    this.body.setCollisionCategory(CATEGORY_ENEMY)
-    this.body.fixedRotation = true
+
     this.kill()
-    this.body.kill()
 
     // default settings of enemy, you should override these
     this.MOVE_SPEED = 100
@@ -27,9 +23,20 @@ export default class Enemy extends Phaser.Sprite {
     this.attacking = false // for attack animation
   }
 
+  resetBody () {
+    if (!this.body) {
+      this.game.physics.box2d.enable(this)
+    }
+    // physics
+    this.body.setCollisionCategory(CATEGORY_ENEMY)
+    this.body.fixedRotation = true
+  }
+
   /* Standard reset is called from the spawn-function (se example enemy later in the tutorial */
   stdReset (x, y) {
     this.reset(x, y, this.maxHealth)
+    this.resetBody()
+
     this.dying = false
     this.hurting = false // for hurt animation
     this.attacking = false // for attack animation
@@ -38,7 +45,7 @@ export default class Enemy extends Phaser.Sprite {
   }
 
   shouldUpdate () {
-    return this.exists
+    return this.exists && !this.dying
   }
 
   stdUpdate () {
@@ -116,13 +123,13 @@ export default class Enemy extends Phaser.Sprite {
 
     if (this.health <= 0) {
       this.stop()
-      this.body.kill()
       this.death() // we call death here, if you have dying animation, override the death method
     }
   }
 
   death () {
     this.kill()
-    this.body.kill()
+    this.body.destroy()
+    this.body = null
   }
 }

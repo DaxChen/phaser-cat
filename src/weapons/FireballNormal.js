@@ -3,7 +3,7 @@ import { FireballNormalBullet } from './FireballBullets'
 
 export default class FireballNormal extends Phaser.Group {
   constructor ({ game }) {
-    super(game, game.world, 'Fireball Normal', false, true, Phaser.Physics.BOX2D)
+    super(game, game.world, 'Fireball Normal')
 
     this._nextFire = 0
     this.bulletSpeed = 600

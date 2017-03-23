@@ -3,7 +3,7 @@ import Monster1 from './Monster1'
 
 export default class Monster1Group extends Phaser.Group {
   constructor ({ game }) {
-    super(game, game.world, 'Monster1 Group', false, true, Phaser.Physics.BOX2D)
+    super(game, game.world, 'Monster1 Group')
 
     for (var i = 0; i < 64; i++) {
       this.add(new Monster1({ game }), true)

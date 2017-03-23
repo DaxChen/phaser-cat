@@ -5,10 +5,6 @@ export default class Monster1 extends Enemy {
   constructor ({ game }) {
     super({ game, asset: 'monster1' })
 
-    // physics
-    this.body.setCircle(13, 0, 3) // this resets `setCollisionCategory`, so let's call it again
-    this.body.setCollisionCategory(CATEGORY_ENEMY)
-
     // configs
     this.MOVE_SPEED = 100
     this.ATTACK_RANGE = 36
@@ -16,6 +12,14 @@ export default class Monster1 extends Enemy {
     this.maxHealth = 20
 
     this.initAnimations()
+  }
+
+  resetBody () {
+    Enemy.prototype.resetBody.call(this)
+
+    // physics
+    this.body.setCircle(13, 0, 3) // this resets `setCollisionCategory`, so let's call it again
+    this.body.setCollisionCategory(CATEGORY_ENEMY)
   }
 
   initAnimations () {
@@ -32,7 +36,6 @@ export default class Monster1 extends Enemy {
     this.animations.add('death', [16, 17, 18, 19, 20, 21, 22, 23], 15, false)
       .onComplete.add(() => {
         this.kill()
-        this.body.kill()
       })
   }
 
@@ -65,5 +68,7 @@ export default class Monster1 extends Enemy {
   death () {
     this.dying = true
     this.stop()
+    this.body.destroy()
+    this.body = null
   }
 }

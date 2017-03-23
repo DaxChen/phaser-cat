@@ -3,7 +3,7 @@ import Bullet from './Bullet'
 
 export default class Weapon extends Phaser.Group {
   constructor ({ game, name = 'Weapon Group', bulletClass }) {
-    super(game, game.world, name, false, true, Phaser.Physics.BOX2D)
+    super(game, game.world, name)
 
     this.shots = 0
     this.fireLimit = 0
@@ -42,7 +42,7 @@ export default class Weapon extends Phaser.Group {
     if (group === undefined) { group = this.game.world }
 
     if (!this.bullets) {
-      this.bullets = this.game.add.physicsGroup(Phaser.Physics.BOX2D, group)
+      this.bullets = this.game.add.physicsGroup(Phaser.Physics.BOX2D, group) // TODO bullets already have enable
       this.bullets.classType = this._bulletClass
     }
 
