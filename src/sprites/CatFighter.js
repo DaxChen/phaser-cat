@@ -5,6 +5,9 @@ import {
   updateHealthBar
 } from '../utils/player-util'
 import { getBulletUID } from '../weapons/weapon-config'
+import FireballNormal from '../weapons/FireballNormal'
+import FireballCharged from '../weapons/FireballCharged'
+import FireballSuper from '../weapons/FireballSuper'
 
 export default class CatFighter extends Phaser.Sprite {
   constructor ({ game, x, y, asset }) {
@@ -13,13 +16,18 @@ export default class CatFighter extends Phaser.Sprite {
     // debug
     if (__DEV__) { window.player = this } /* global __DEV__ */
 
-    //  enable physics on the player
+    // enable physics on the player
     game.physics.box2d.enable(this)
+    // the body shape of this cat is a rectangle
     this.body.setRectangle(13, 28, -1, 8)
+    // do not spin when collide
     this.body.fixedRotation = true
 
     // animations
     this.initAnimations()
+
+    // weapon
+    this.initWeapons()
 
     // states to determine animations
     this.hurting = false
@@ -36,20 +44,17 @@ export default class CatFighter extends Phaser.Sprite {
     this.direction = 0
 
     // settings
-    this.speed = 200
-    this.maxHealth = 100
-    this.health = this.maxHealth
-    this.DEF = 0
-    this.FIREBALL_SUPER_CHARGE_TIME = 1500
+    this.speed = 200 // the walking speed of this player
+    this.maxHealth = 100 // the max health of this player
+    this.health = this.maxHealth // the current health
+    this.DEF = 0 // the defend point
+    // how long does the player has to charge to make the fireballSuper
+    this.FIREBALL_SUPER_CHARGE_TIME = 1500 // ms
 
-    // weapons
-    this.currentWeapon = 'fireball'
-    this.weapons = {}
-
-    // setup initial invincible timer
+    // setup initial invincible timer, make the player flash and invincible
     invincibleTimer({ game, player: this })
 
-    // healthBar
+    // the healthBar plugin
     this.healthBar = new HealthBar(this.game, {
       width: 24,
       height: 3,
@@ -60,6 +65,7 @@ export default class CatFighter extends Phaser.Sprite {
     // controls
     this.cursors = game.input.keyboard.createCursorKeys()
     this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR)
+
     // stop the event from propagating up to the browser
     game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ])
   }
@@ -75,6 +81,7 @@ export default class CatFighter extends Phaser.Sprite {
       .onComplete.add(() => { this.fireballChargeState = 'charge' })
     this.animations.add('fireball-charge', [83, 84], 12, true)
     this.animations.add('fireball-charge-super', [87, 88], 12, true)
+
     const fireballShotOnComplete = () => {
       this.fireballing = false
       this.fireballChargeState = 'ready'
@@ -85,11 +92,23 @@ export default class CatFighter extends Phaser.Sprite {
       .onComplete.add(fireballShotOnComplete)
   }
 
-  addWeapon (name, weapon) {
-    this.weapons[name] = weapon
-    weapon.trackedSprite = this
+  initWeapons () {
+    // weapons
+    this.currentWeapon = 'fireball'
+    this.weapons = {}
+
+    // fireball
+    this.weapons.fireballNormal = new FireballNormal({ game: this.game })
+    this.weapons.fireballNormal.trackedSprite = this // let the weapon follow this player
+    this.weapons.fireballCharged = new FireballCharged({ game: this.game })
+    this.weapons.fireballCharged.trackedSprite = this // let the weapon follow this player
+    this.weapons.fireballSuper = new FireballSuper({ game: this.game })
+    this.weapons.fireballSuper.trackedSprite = this // let the weapon follow this player
   }
 
+  /**
+   * Called in update, check which animation should be played
+   */
   checkAnim () {
     // dying
     if (this.dying) { return this.play('death') }
@@ -109,6 +128,7 @@ export default class CatFighter extends Phaser.Sprite {
     const { body, cursors, scale, speed } = this
     body.setZeroVelocity()
 
+    // movement cursors
     if (cursors.left.isDown) {
       body.moveLeft(speed)
       scale.setTo(-1, 1)
@@ -162,7 +182,7 @@ export default class CatFighter extends Phaser.Sprite {
   fireFireball (chargeTime) {
     let type = 'fireballNormal'
     if (this.fireballChargeState !== 'ready') {
-      // type = chargeTime > this.FIREBALL_SUPER_CHARGE_TIME ? 'fireballSuper' : 'fireballCharged'
+      type = chargeTime > this.FIREBALL_SUPER_CHARGE_TIME ? 'fireballSuper' : 'fireballCharged'
     }
 
     this.weapons[type].fireAngle = this.direction

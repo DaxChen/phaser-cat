@@ -1,75 +1,83 @@
 import Phaser from 'phaser'
-import Bullet from './Bullet'
 
+/**
+ * A weapon is basically a Bullet pool manager,
+ * which is a Phaser.Group containing a bunch of bullets and some helper methods.
+ *
+ * Entend this Class to create new weapon.
+ */
 export default class Weapon extends Phaser.Group {
-  constructor ({ game, name = 'Weapon Group', bulletClass }) {
+  /**
+   * @constructor
+   * @param {Object} obj - pass in an object
+   * @param {Phaser.Game} obj.game - reference to game
+   * @param {string} obj.name - the name of this Phaser.Group
+   */
+  constructor ({ game, name }) {
     super(game, game.world, name)
 
-    this.shots = 0
-    this.fireLimit = 0
-    this.fireRate = 300
-    this.fireAngle = Phaser.ANGLE_UP
-    this.bulletAngleOffset = 0
-    this.bulletAngleVariance = 0
-    this.bulletSpeed = 600
-    this.bulletKillDistance = 0
-    this.bulletRotateToVelocity = false
-    this.bulletKey = bulletKey
-
-    this._bulletClass = bulletClass
-    this._bulletCollideWorldBounds = false
-    this.bounds = new Phaser.Rectangle()
-    this.bulletBounds = game.world.bounds
-
-    this.onFire = new Phaser.Signal()
-    this.onKill = new Phaser.Signal()
-    this.onFireLimit = new Phaser.Signal()
-
-    this.trackedSprite = null
-    this.trackRotation = false
-    this.trackOffset = new Phaser.Point()
-
+    // internal time to track if next bullet can be fired
     this._nextFire = 0
-    this._rotatedPoint = new Phaser.Point()
+    // the bullet flying speed
+    this.bulletSpeed = 300
+    // the rate you can fire this weapon
+    this.fireRate = 100
+    // the direction to fire the next bullet (updated before firing)
+    this.fireAngle = Phaser.ANGLE_UP
+    // the sprite this weapon should be tracking, ie. the player holding this weapon
+    this.trackedSprite = null
+    // the offset when the bullet is fired, from the center of the trackedSprite
+    this.trackOffset = new Phaser.Point()
+    // the bullet Class this weapon is using, must be set!
+    this._bulletClass = null
+    // the bullet will be killed when it reaches a distance from it's fired point
+    this.bulletKillType = Phaser.Weapon.KILL_DISTANCE
+    this.bulletKillDistance = 200
 
-    for (var i = 0; i < 10; i++) {
-      this.add(new bulletClass({ game }), true)
-    }
-  }
-
-  createBullets ({ quantity, key, group }) {
-    if (quantity === undefined) { quantity = 1 }
-    if (group === undefined) { group = this.game.world }
-
-    if (!this.bullets) {
-      this.bullets = this.game.add.physicsGroup(Phaser.Physics.BOX2D, group) // TODO bullets already have enable
-      this.bullets.classType = this._bulletClass
-    }
-
-    if (quantity !== 0) {
-      if (quantity === -1) {
-        this.autoExpandBulletsGroup = true
-        quantity = 1
-      }
-
-      this.bullets.createMultiple(quantity, key)
-
-      this.bullets.setAll('data.bulletManager', this)
-
-      this.bulletKey = key
-    }
+    // this event will be fired when its bullets are killed
+    this.onKill = new Phaser.Signal()
 
     return this
   }
 
-  fire (x, y) {
-    if (this.game.time.time < this._nextFire || (this.fireLimit > 0 && this.shots === this.fireLimit)) { return }
+  /**
+   * creates a pool of bullets in this group
+   * call this in the extended class's constructor
+   */
+  createBullets (quantity = 1) {
+    for (var i = 0; i < quantity; i++) {
+      this.add(new this._bulletClass({ game: this.game }), true)
+    }
 
+    this.setAll('data.bulletManager', this)
+    this.setAll('data.killDistance', this.bulletKillDistance)
+  }
+
+  /**
+   * Fires a bullet, the direction of the bullet is controlled by `this.fireAngle`,
+   * so update that before calling this method
+   */
+  fire () {
+    if (this.game.time.now < this._nextFire) { return }
+
+    const x = this.trackedSprite.x + this.trackOffset.x
+    const y = this.trackedSprite.y + this.trackOffset.y
+
+    // check if there's available bullets in the pool
     let bullet = this.getFirstExists(false)
+    // if no, create a new one and add it to the pool
     if (!bullet) {
-      bullet = new Bullet({ game: this.game, asset: this.bulletKey })
+      bullet = new this._bulletClass({ game: this.game })
+      bullet.data.bulletManager = this
+      bullet.data.bulletKillDistance = this.bulletKillDistance
       this.add(bullet, true)
     }
-    bullet.fire(x, y)
+
+    bullet.data.fromX = x
+    bullet.data.fromY = y
+
+    bullet.fire(x, y, this.fireAngle, this.bulletSpeed)
+
+    this._nextFire = this.game.time.now + this.fireRate
   }
 }

@@ -35,7 +35,7 @@ export class FireballChargedBullet extends Bullet {
   }
   resetBody () {
     Bullet.prototype.resetBody.call(this)
-    this.body.setRectangle(16, 12, 4, 0)
+    this.body.setRectangle(16, 16, 4, 0)
     this.body.setCollisionCategory(CATEGORY_BULLET)
   }
   preKill () {
@@ -57,7 +57,7 @@ export class FireballSuperBullet extends Bullet {
   }
   resetBody () {
     Bullet.prototype.resetBody.call(this)
-    this.body.setRectangle(16, 12, 4, 0)
+    this.body.setRectangle(16, 42, 4, 2)
     this.body.setCollisionCategory(CATEGORY_BULLET)
   }
   preKill () {

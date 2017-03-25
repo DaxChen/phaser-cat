@@ -2,8 +2,11 @@
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
 import Monster1Group from '../sprites/Monster1Group'
-import FireballNormal from '../weapons/FireballNormal'
 
+/**
+ * This is the main game state,
+ * we create the player CatFighter and the monsters here.
+ */
 export default class Game extends Phaser.State {
   init () {
   }
@@ -26,6 +29,7 @@ export default class Game extends Phaser.State {
     this.game.world.setBounds(0, 0, 1920, 1920)
     this.game.physics.box2d.setBoundsToWorld()
 
+    // Create the player, and add to game
     this.player = new CatFighter({
       game: this.game,
       x: this.world.centerX,
@@ -33,29 +37,15 @@ export default class Game extends Phaser.State {
       asset: 'cat'
     })
     this.game.add.existing(this.player)
+    // let the camera follow the player
     this.game.camera.follow(this.player/* , Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1 */)
 
-    // weapon
-    this.initWeapons()
-
-    // bullets
-    // this.singleBullets = [
-    //   this.player.weapons.fireballNormal.bullets
-    // ]
-    // this.splashBullets = [
-    //   this.player.weapons.fireballCharged.bullets
-    // ]
-    // this.penetrableBullets = [
-    //   this.player.weapons.fireballSuper.bullets
-    // ]
-
+    // the monster1 pool
     this.monster1group = new Monster1Group({ game: this.game })
-    this.nextEnemy = 0
+    // internal time of when the next enemy can spawn
+    this._nextEnemy = 0
+    // the spawn rate of monster
     this.spawnRate = 3000
-  }
-
-  initWeapons () {
-    this.player.addWeapon('fireballNormal', new FireballNormal({ game: this.game }))
   }
 
   update () {
@@ -63,7 +53,7 @@ export default class Game extends Phaser.State {
   }
 
   spawnEnemies () {
-    if (this.game.time.time < this.nextEnemy) { return }
+    if (this.game.time.time < this._nextEnemy) { return }
 
     if (Math.random() < 0.5) {
       this.monster1group.spawn(Math.random() < 0.5 ? 0 : this.world.width, this.world.randomY)
@@ -71,7 +61,7 @@ export default class Game extends Phaser.State {
       this.monster1group.spawn(this.world.randomX, Math.random() < 0.5 ? 0 : this.world.height)
     }
 
-    this.nextEnemy = this.game.time.time + this.spawnRate
+    this._nextEnemy = this.game.time.time + this.spawnRate
   }
 
   render () {
