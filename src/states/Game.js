@@ -14,20 +14,21 @@ export default class Game extends Phaser.State {
   }
 
   create () {
+    // background and world bounds
+    this.game.add.tileSprite(0, 0, 960, 960, 'background')
+    this.game.world.setBounds(0, 0, 960, 960)
+    this.game.physics.box2d.setBoundsToWorld()
+
     // banner
     const bannerText = 'use ← ↑ → ↓ to move, spacebar to fire!'
-    let banner = this.add.text(this.world.centerX, this.game.height - 80, bannerText)
+    let banner = this.add.text(this.game.width / 2, this.game.height - 30, bannerText)
     banner.font = 'Bangers'
     banner.padding.set(10, 16)
     banner.fontSize = 40
     banner.fill = '#77BFA3'
     banner.smoothed = false
     banner.anchor.setTo(0.5)
-
-    // world bounds
-    this.game.add.tileSprite(0, 0, 1920, 1920, 'debug-grid')
-    this.game.world.setBounds(0, 0, 1920, 1920)
-    this.game.physics.box2d.setBoundsToWorld()
+    banner.fixedToCamera = true
 
     // Create the player, and add to game
     this.player = new CatFighter({

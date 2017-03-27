@@ -8,6 +8,7 @@ import { getBulletUID } from '../weapons/weapon-config'
 import FireballNormal from '../weapons/FireballNormal'
 import FireballCharged from '../weapons/FireballCharged'
 import FireballSuper from '../weapons/FireballSuper'
+import Rifle from '../weapons/Rifle'
 
 export default class CatFighter extends Phaser.Sprite {
   constructor ({ game, x, y, asset }) {
@@ -65,36 +66,57 @@ export default class CatFighter extends Phaser.Sprite {
     // controls
     this.cursors = game.input.keyboard.createCursorKeys()
     this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR)
+    this.changeWeaponButton = game.input.keyboard.addKey(Phaser.KeyCode.E)
+    this.changeWeaponButton.onDown.add(() => { this.changeWeapon() })
 
     // stop the event from propagating up to the browser
     game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ])
   }
 
   initAnimations () {
-    this.animations.add('idle', [0, 1, 2, 3], 12, true)
-    this.animations.add('walk', [16, 17, 18, 19, 20, 21, 22, 23], 30, true)
-    this.animations.add('hurt', [64, 65, 66, 65], 12, false)
-      .onComplete.add(() => { this.hurting = false })
-    this.animations.add('death', [64, 65, 66, 67, 68, 69, 70], 12, false)
-      .onComplete.add(() => { this.myReset(this.world.centerX, this.world.centerY, this.maxHealth) })
-    this.animations.add('fireball-ready', [80, 81, 82], 12, false)
+    const onHurtEnd = () => { this.hurting = false }
+    const onDeathEnd = () => {
+      this.myReset(this.world.centerX, this.world.centerY, this.maxHealth)
+    }
+    // rifle
+    this.animations.add('rifle-on', [0, 1, 2, 3], 12, false)
+      .onComplete.add(() => { this.weaponChanging = false })
+    this.animations.add('rifle-off', [3, 2, 1, 0], 12, false)
+      .onComplete.add(() => { this.weaponChanging = false })
+    this.animations.add('rifle-idle', [16, 17, 18, 19, 20, 21, 22, 23], 12, true)
+    this.animations.add('rifle-walk', [48, 49, 50, 51, 52, 53, 54, 55], 30, true)
+    this.animations.add('rifle-fire-stand', [32, 33, 34, 35, 36, 37, 38, 39], 30, true)
+    this.animations.add('rifle-fire-walk', [64, 65, 66, 67, 68, 69, 70, 71], 30, true)
+    this.animations.add('rifle-hurt', [80, 81, 82, 81], 12, false)
+      .onComplete.add(onHurtEnd)
+    this.animations.add('rifle-death', [80, 81, 82, 83, 84, 85, 86], 12, false)
+      .onComplete.add(onDeathEnd)
+
+    // fireball
+    this.animations.add('fireball-idle', [96, 97, 98, 99], 12, true)
+    this.animations.add('fireball-walk', [112, 113, 114, 115, 116, 117, 118, 119], 30, true)
+    this.animations.add('fireball-hurt', [128, 129, 130, 129], 12, false)
+      .onComplete.add(onHurtEnd)
+    this.animations.add('fireball-death', [128, 129, 130, 131, 132, 133, 134], 12, false)
+      .onComplete.add(onDeathEnd)
+    this.animations.add('fireball-ready', [144, 145, 146], 12, false)
       .onComplete.add(() => { this.fireballChargeState = 'charge' })
-    this.animations.add('fireball-charge', [83, 84], 12, true)
-    this.animations.add('fireball-charge-super', [87, 88], 12, true)
+    this.animations.add('fireball-charge', [147, 148], 12, true)
+    this.animations.add('fireball-charge-super', [151, 152], 12, true)
 
     const fireballShotOnComplete = () => {
       this.fireballing = false
       this.fireballChargeState = 'ready'
     }
-    this.animations.add('fireball-shot', [85, 86], 12, false)
+    this.animations.add('fireball-shot', [149, 150], 12, false)
       .onComplete.add(fireballShotOnComplete)
-    this.animations.add('fireball-shot-super', [89, 90, 91, 92, 93, 94], 12, false)
+    this.animations.add('fireball-shot-super', [153, 154, 155, 156, 157, 158], 12, false)
       .onComplete.add(fireballShotOnComplete)
   }
 
   initWeapons () {
     // weapons
-    this.currentWeapon = 'fireball'
+    this.currentWeapon = 'rifle'
     this.weapons = {}
 
     // fireball
@@ -104,24 +126,69 @@ export default class CatFighter extends Phaser.Sprite {
     this.weapons.fireballCharged.trackedSprite = this // let the weapon follow this player
     this.weapons.fireballSuper = new FireballSuper({ game: this.game })
     this.weapons.fireballSuper.trackedSprite = this // let the weapon follow this player
+
+    // rifle
+    this.weapons.rifle = new Rifle({ game: this.game })
+    this.weapons.rifle.trackedSprite = this
+  }
+
+  changeWeapon () {
+    if (this.currentWeapon === 'fireball') {
+      this.currentWeapon = 'rifle'
+
+      this.fireballCharging = false
+      this.fireballing = false
+    } else {
+      this.currentWeapon = 'fireball'
+    }
+
+    this.weaponChanging = true
   }
 
   /**
    * Called in update, check which animation should be played
    */
   checkAnim () {
-    // dying
-    if (this.dying) { return this.play('death') }
-    // fireballing
-    if (this.fireballing) {
-      return this.play(`fireball-${this.fireballChargeState}`)
+    const prefix = this.currentWeapon + '-'
+    if (this.currentWeapon === 'fireball') {
+      // dying
+      if (this.dying) { return this.play(prefix + 'death') }
+      // fireballing
+      if (this.fireballing) {
+        return this.play(`fireball-${this.fireballChargeState}`)
+      }
+      // hurt
+      if (this.hurting) { return this.play(prefix + 'hurt') }
+      // changeWeapon
+      if (this.weaponChanging) { return this.play('rifle-off') }
+      // move
+      if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) { return this.play(prefix + 'walk') }
+      // idle
+      return this.play(prefix + 'idle')
+    } else if (this.currentWeapon === 'rifle') {
+      // dying
+      if (this.dying) { return this.play(prefix + 'death') }
+      // hurt
+      if (this.hurting) { return this.play(prefix + 'hurt') }
+      // changeWeapon
+      if (this.weaponChanging) { return this.play('rifle-on') }
+      // firing
+      if (this.fireButton.isDown) {
+        // fire + move
+        if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) {
+          return this.play('rifle-fire-walk')
+        }
+        // fire + idle
+        return this.play('rifle-fire-stand')
+      } else {
+        // move
+        if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) {
+          return this.play('rifle-walk')
+        }
+        // idle
+        return this.play('rifle-idle')
+      }
     }
-    // hurt
-    if (this.hurting) { return this.play('hurt') }
-    // move
-    if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) { return this.play('walk') }
-    // idle
-    this.play('idle')
   }
 
   update () {
@@ -152,23 +219,29 @@ export default class CatFighter extends Phaser.Sprite {
     }
 
     // fireball
-    if (this.fireButton.isDown) {
-      if (!this.fireballCharging) {
-        // new start
-        this.fireballCharging = true
-        this.fireballing = true
-        this.fireballChargeState = 'ready'
-        this.fireballChargeStartTime = this.game.time.time
+    if (this.currentWeapon === 'fireball') {
+      if (this.fireButton.isDown) {
+        if (!this.fireballCharging) {
+          // new start
+          this.fireballCharging = true
+          this.fireballing = true
+          this.fireballChargeState = 'ready'
+          this.fireballChargeStartTime = this.game.time.time
+        }
+        if (this.game.time.time - this.fireballChargeStartTime > this.FIREBALL_SUPER_CHARGE_TIME) {
+          this.fireballChargeState = 'charge-super'
+        }
+        body.setZeroVelocity()
+      } else {
+        if (this.fireballCharging) {
+          // just released!
+          this.fireballCharging = false
+          this.fireFireball(this.game.time.time - this.fireballChargeStartTime)
+        }
       }
-      if (this.game.time.time - this.fireballChargeStartTime > this.FIREBALL_SUPER_CHARGE_TIME) {
-        this.fireballChargeState = 'charge-super'
-      }
-      body.setZeroVelocity()
-    } else {
-      if (this.fireballCharging) {
-        // just released!
-        this.fireballCharging = false
-        this.fireFireball(this.game.time.time - this.fireballChargeStartTime)
+    } else if (this.currentWeapon === 'rifle') {
+      if (this.fireButton.isDown) {
+        this.fireRifle()
       }
     }
 
@@ -211,6 +284,32 @@ export default class CatFighter extends Phaser.Sprite {
 
     // update animation
     this.fireballChargeState = type === 'fireballSuper' ? 'shot-super' : 'shot'
+  }
+
+  fireRifle () {
+    const { rifle } = this.weapons
+    rifle.fireAngle = this.direction
+    // trackOffset
+    rifle.trackOffset.x = 0
+    rifle.trackOffset.y = 8
+    if (this.direction <= 45 && this.direction >= -45) {
+      // right
+      rifle.trackOffset.x += 10
+    } else if (this.direction <= -135 || this.direction >= 135) {
+      // left
+      rifle.trackOffset.x -= 10
+    }
+    if (this.direction >= 45 && this.direction <= 135) {
+      // down
+      rifle.trackOffset.y += 10
+    } else if (this.direction <= -45 && this.direction >= -135) {
+      // up
+      rifle.trackOffset.y -= 20
+    }
+
+    const bullet = rifle.fire()
+    // bullet can be fales or null if not enough time has expired since the last fire
+    if (bullet) { bullet.bulletUID = getBulletUID() }
   }
 
   hit (enemy) {

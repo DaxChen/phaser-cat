@@ -6,10 +6,10 @@ export default class Monster1 extends Enemy {
     super({ game, asset: 'monster1' })
 
     // configs
-    this.MOVE_SPEED = 100
+    this.MOVE_SPEED = 50
     this.ATTACK_RANGE = 36
     this.ATK = 10
-    this.maxHealth = 20
+    this.maxHealth = 5
 
     this.initAnimations()
   }

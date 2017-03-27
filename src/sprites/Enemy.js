@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import { ATK as bulletATK } from '../weapons/weapon-config'
 import { CATEGORY_ENEMY } from '../config'
 
 export default class Enemy extends Phaser.Sprite {
@@ -118,7 +117,7 @@ export default class Enemy extends Phaser.Sprite {
 
     this.hurting = true
 
-    this.health -= bulletATK[bullet.key]
+    this.health -= bullet.data.ATK
     // console.log(this.health + '/' + this.maxHealth)
 
     if (this.health <= 0) {

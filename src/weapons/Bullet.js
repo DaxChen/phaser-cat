@@ -38,6 +38,7 @@ export default class Bullet extends Phaser.Sprite {
       rotateToVelocity: true, // should this rotate based on the velocity direction
       killType: Phaser.Weapon.KILL_DISTANCE, // the bullet gets killed when flying for a distance
       killDistance: 400,
+      ATK: 1,
       flyAnim: '' // the animation played when bullet is fired
     }
   }
@@ -57,7 +58,7 @@ export default class Bullet extends Phaser.Sprite {
     // the collision category of this body
     this.body.setCollisionCategory(CATEGORY_BULLET)
 
-    // this.body.bullet = true // wheather to use CCD
+    this.body.bullet = true // wheather to use CCD
 
     // contact callbacks
     this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
@@ -189,7 +190,7 @@ export default class Bullet extends Phaser.Sprite {
     // we only care about the begin, no the end event
     if (!begin) { return }
 
-    if (body2.sprite) {
+    if (body2.sprite && this.exists) {
       body2.sprite.hit(this)
     }
 
