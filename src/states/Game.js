@@ -20,11 +20,11 @@ export default class Game extends Phaser.State {
     this.game.physics.box2d.setBoundsToWorld()
 
     // banner
-    const bannerText = 'use ← ↑ → ↓ to move, spacebar to fire!'
+    const bannerText = 'Move : ← ↑ → ↓, Fire : spacebar, Change Weapon : E'
     let banner = this.add.text(this.game.width / 2, this.game.height - 30, bannerText)
     banner.font = 'Bangers'
     banner.padding.set(10, 16)
-    banner.fontSize = 40
+    banner.fontSize = 30
     banner.fill = '#77BFA3'
     banner.smoothed = false
     banner.anchor.setTo(0.5)
