@@ -9,6 +9,7 @@ export default class Monster1 extends Enemy {
     this.MOVE_SPEED = 50
     this.ATTACK_RANGE = 36
     this.ATK = 10
+    this.BASE_SCORE = 10
     this.maxHealth = 5
 
     this.initAnimations()

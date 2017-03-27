@@ -2,6 +2,7 @@
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
 import Monster1Group from '../sprites/Monster1Group'
+import HUD from '../displays/HUD'
 
 /**
  * This is the main game state,
@@ -19,17 +20,6 @@ export default class Game extends Phaser.State {
     this.game.world.setBounds(0, 0, 960, 960)
     this.game.physics.box2d.setBoundsToWorld()
 
-    // banner
-    const bannerText = 'Move : ← ↑ → ↓, Fire : spacebar, Change Weapon : E'
-    let banner = this.add.text(this.game.width / 2, this.game.height - 30, bannerText)
-    banner.font = 'Bangers'
-    banner.padding.set(10, 16)
-    banner.fontSize = 30
-    banner.fill = '#77BFA3'
-    banner.smoothed = false
-    banner.anchor.setTo(0.5)
-    banner.fixedToCamera = true
-
     // Create the player, and add to game
     this.player = new CatFighter({
       game: this.game,
@@ -43,10 +33,28 @@ export default class Game extends Phaser.State {
 
     // the monster1 pool
     this.monster1group = new Monster1Group({ game: this.game })
+    this.monster1group.onChildKill.add(this.onEnemyKill, this)
     // internal time of when the next enemy can spawn
     this._nextEnemy = 0
     // the spawn rate of monster
     this.spawnRate = 3000
+
+    // HUD: add at last to be on top
+    this.HUD = new HUD({ game: this.game })
+    this.score = 0
+    this.comboMultiplier = 1
+  }
+
+  get score () {
+    return this._score
+  }
+  set score (newScore) {
+    this._score = newScore
+    this.HUD.updateScore(newScore)
+  }
+
+  onEnemyKill (enemy) {
+    this.score += enemy.BASE_SCORE * this.comboMultiplier
   }
 
   update () {

@@ -2,15 +2,17 @@ import Phaser from 'phaser'
 import { CATEGORY_ENEMY } from '../config'
 
 export default class Enemy extends Phaser.Sprite {
-
   constructor ({ game, asset }) {
     super(game, 0, 0, asset)
 
     this.kill()
 
     // default settings of enemy, you should override these
-    this.MOVE_SPEED = 100
+    this.MOVE_SPEED = 50
     this.ATTACK_RANGE = 40
+    this.ATK = 1
+    this.BASE_SCORE = 1
+    this.maxHealth = 1
 
     // some variables
     this.hitBullets = [] // this is a collection of bulletUIDs this enemy had hit already
@@ -121,6 +123,7 @@ export default class Enemy extends Phaser.Sprite {
     // console.log(this.health + '/' + this.maxHealth)
 
     if (this.health <= 0) {
+      this.parent.onChildKill.dispatch(this)
       this.stop()
       this.death() // we call death here, if you have dying animation, override the death method
     }
