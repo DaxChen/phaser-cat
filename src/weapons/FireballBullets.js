@@ -68,4 +68,20 @@ export class FireballSuperBullet extends Bullet {
     this.killBody()
     this.play('end')
   }
+  // to let bullet pass through, override
+  hitEnemy (body1, body2, fixture1, fixture2, begin) {
+    // we only care about the begin, no the end event
+    if (!begin) { return }
+
+    if (body2.sprite && this.exists) {
+      body2.sprite.hit(this)
+    }
+
+    // It is possible for the bullet to collide with more than one tile body
+    // in the same timestep, in which case this will run twice, so we need to
+    // check if the sprite has already been destroyed.
+    if (this.exists) {
+      // do nothing so bullet passes through
+    }
+  }
 }

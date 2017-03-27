@@ -59,6 +59,7 @@ export default class Bullet extends Phaser.Sprite {
     this.body.setCollisionCategory(CATEGORY_BULLET)
 
     this.body.bullet = true // wheather to use CCD
+    this.body.kinematic = true // do not react to forces
 
     // contact callbacks
     this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
