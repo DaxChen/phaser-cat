@@ -272,7 +272,7 @@ export default class CatFighter extends Phaser.Sprite {
     }
     if (this.direction >= 45 && this.direction <= 135) {
       // down
-      this.weapons[type].trackOffset.y = 10
+      this.weapons[type].trackOffset.y = 20
     } else if (this.direction <= -45 && this.direction >= -135) {
       // up
       this.weapons[type].trackOffset.y = -10
