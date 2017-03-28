@@ -37,7 +37,7 @@ export default class Game extends Phaser.State {
     // internal time of when the next enemy can spawn
     this._nextEnemy = 0
     // the spawn rate of monster
-    this.spawnRate = 3000
+    this.spawnRate = 1000
 
     // HUD: add at last to be on top
     this.HUD = new HUD({ game: this.game })
@@ -45,6 +45,9 @@ export default class Game extends Phaser.State {
     this.comboMultiplier = 1
     this.HUD.onComboFade.add(() => this.comboMultiplier--)
     this.player.onWeaponChange.add(w => this.HUD.updateWeapon(w))
+    this.player.onDeath.add(() => {
+      this.game.state.start('GameOver', true, false, this.score)
+    })
   }
 
   get score () {

@@ -24,6 +24,9 @@ export default class CatFighter extends Phaser.Sprite {
     // do not spin when collide
     this.body.fixedRotation = true
 
+    // events
+    this.onDeath = new Phaser.Signal()
+
     // animations
     this.initAnimations()
 
@@ -77,7 +80,8 @@ export default class CatFighter extends Phaser.Sprite {
   initAnimations () {
     const onHurtEnd = () => { this.hurting = false }
     const onDeathEnd = () => {
-      this.myReset(this.world.centerX, this.world.centerY, this.maxHealth)
+      // this.myReset(this.world.centerX, this.world.centerY, this.maxHealth)
+      this.onDeath.dispatch(this)
     }
     // rifle
     this.animations.add('rifle-on', [0, 1, 2, 3], 12, false)
