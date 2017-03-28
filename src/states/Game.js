@@ -43,6 +43,7 @@ export default class Game extends Phaser.State {
     this.HUD = new HUD({ game: this.game })
     this.score = 0
     this.comboMultiplier = 1
+    this.HUD.onComboFade.add(() => this.comboMultiplier--)
   }
 
   get score () {
@@ -52,9 +53,17 @@ export default class Game extends Phaser.State {
     this._score = newScore
     this.HUD.updateScore(newScore)
   }
+  get comboMultiplier () {
+    return this._comboMultiplier
+  }
+  set comboMultiplier (newCM) {
+    this._comboMultiplier = newCM < 1 ? 1 : newCM
+    this.HUD.updateCombo(this._comboMultiplier)
+  }
 
   onEnemyKill (enemy) {
-    this.score += enemy.BASE_SCORE * this.comboMultiplier
+    this.comboMultiplier++ // this will trigger the setter
+    this.score += enemy.BASE_SCORE * this.comboMultiplier // this will trigger the setter
   }
 
   update () {
