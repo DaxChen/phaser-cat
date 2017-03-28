@@ -11,6 +11,7 @@ export default class HUD extends Phaser.Group {
     this.initBanner()
     this.initScore()
     this.initCombo()
+    this.initWeapon()
   }
 
   initBanner () {
@@ -54,7 +55,7 @@ export default class HUD extends Phaser.Group {
       this.game,
       this.game.width - 10,
       10,
-      '×' + 1
+      '× ' + 1
     )
     this.add(cm, true)
     this.comboMultiplier = cm
@@ -72,7 +73,25 @@ export default class HUD extends Phaser.Group {
   }
   updateCombo (cm) {
     this._comboMultiplier = cm
-    this.comboMultiplier.text = '×' + cm
+    this.comboMultiplier.text = '× ' + cm
     this.comboFader.reset(cm)
+  }
+
+  initWeapon () {
+    const weapon = new Phaser.Text(
+      this.game, this.game.width / 2, 10,
+      'Current Weapon: rifle'
+    )
+    this.add(weapon, true)
+    this.weapon = weapon
+    // weapon.font = 'Bangers'
+    weapon.padding.set(10, 16)
+    weapon.fontSize = 30
+    weapon.fill = '#ffffff'
+    weapon.smoothed = false
+    weapon.anchor.setTo(0.5, 0)
+  }
+  updateWeapon (weapon) {
+    this.weapon.text = 'Current Weapon: ' + weapon
   }
 }

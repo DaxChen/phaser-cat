@@ -28,6 +28,7 @@ export default class CatFighter extends Phaser.Sprite {
     this.initAnimations()
 
     // weapon
+    this.onWeaponChange = new Phaser.Signal()
     this.initWeapons()
 
     // states to determine animations
@@ -131,7 +132,13 @@ export default class CatFighter extends Phaser.Sprite {
     this.weapons.rifle = new Rifle({ game: this.game })
     this.weapons.rifle.trackedSprite = this
   }
-
+  get currentWeapon () {
+    return this._currentWeapon
+  }
+  set currentWeapon (newWeapon) {
+    this.onWeaponChange.dispatch(newWeapon)
+    this._currentWeapon = newWeapon
+  }
   changeWeapon () {
     if (this.currentWeapon === 'fireball') {
       this.currentWeapon = 'rifle'

@@ -44,6 +44,7 @@ export default class Game extends Phaser.State {
     this.score = 0
     this.comboMultiplier = 1
     this.HUD.onComboFade.add(() => this.comboMultiplier--)
+    this.player.onWeaponChange.add(w => this.HUD.updateWeapon(w))
   }
 
   get score () {
