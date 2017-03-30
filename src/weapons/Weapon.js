@@ -49,8 +49,8 @@ export default class Weapon extends Phaser.Group {
       this.add(new this._bulletClass({ game: this.game }), true)
     }
 
-    this.setAll('data.bulletManager', this)
-    this.setAll('data.killDistance', this.bulletKillDistance)
+    this.setAll('bulletManager', this)
+    this.setAll('killDistance', this.bulletKillDistance)
   }
 
   /**
@@ -68,13 +68,13 @@ export default class Weapon extends Phaser.Group {
     // if no, create a new one and add it to the pool
     if (!bullet) {
       bullet = new this._bulletClass({ game: this.game })
-      bullet.data.bulletManager = this
-      bullet.data.bulletKillDistance = this.bulletKillDistance
+      bullet.bulletManager = this
+      bullet.bulletKillDistance = this.bulletKillDistance
       this.add(bullet, true)
     }
 
-    bullet.data.fromX = x
-    bullet.data.fromY = y
+    bullet.fromX = x
+    bullet.fromY = y
 
     bullet.fire(x, y, this.fireAngle, this.bulletSpeed)
 

@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import PIXI from 'pixi'
-import { CATEGORY_ENEMY, CATEGORY_BULLET } from '../config'
+import { CATEGORY_PLAYER, CATEGORY_ENEMY, CATEGORY_BULLET } from '../config'
 import { getBulletUID } from './weapon-config'
 
 /**
@@ -30,17 +30,16 @@ export default class Bullet extends Phaser.Sprite {
     this.visible = false
 
     // these are some settings, you should override them in extended child's constructor
-    this.data = {
-      bulletManager: null, // this is the Weapon Class holding this bullet
-      bulletUID: null, // a UID for this bullet, different on every fire
-      fromX: 0, // the point where this was fired
-      fromY: 0,
-      rotateToVelocity: true, // should this rotate based on the velocity direction
-      killType: Phaser.Weapon.KILL_DISTANCE, // the bullet gets killed when flying for a distance
-      killDistance: 400,
-      ATK: 1,
-      flyAnim: '' // the animation played when bullet is fired
-    }
+    this.bulletManager = null // this is the Weapon Class holding this bullet
+    this.bulletUID = null // a UID for this bullet, different on every fire
+    this.fromX = 0 // the point where this was fired
+    this.fromY = 0
+    this.rotateToVelocity = true // should this rotate based on the velocity direction
+    this.killType = Phaser.Weapon.KILL_DISTANCE // the bullet gets killed when flying for a distance
+    this.killDistance = 400
+    this.ATK = 1
+    this.flyAnim = '' // the animation played when bullet is fired
+    this.shouldHitPlayer = false
   }
 
   /**
@@ -63,12 +62,14 @@ export default class Bullet extends Phaser.Sprite {
 
     // contact callbacks
     this.body.setCategoryContactCallback(CATEGORY_ENEMY, this.hitEnemy, this)
+    // hit player
+    this.body.setCategoryContactCallback(CATEGORY_PLAYER, this.hitPlayer, this)
   }
 
   /** What animation should be played when the bullet just got reset (fired) */
   resetAnim () {
-    if (this.data.flyAnim) {
-      this.play(this.data.flyAnim)
+    if (this.flyAnim) {
+      this.play(this.flyAnim)
     }
   }
 
@@ -125,9 +126,9 @@ export default class Bullet extends Phaser.Sprite {
     this.exists = false
     this.visible = false
 
-    this.data.bulletUID = null
+    this.bulletUID = null
 
-    this.data.bulletManager.onKill.dispatch(this)
+    this.bulletManager.onKill.dispatch(this)
 
     return this
   }
@@ -147,33 +148,33 @@ export default class Bullet extends Phaser.Sprite {
     this.body.velocity.y = v.y
 
     // set the initial rotation
-    if (this.data.rotateToVelocity) {
+    if (this.rotateToVelocity) {
       this.body.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x)
     }
 
     // get a new bulletUID
-    this.data.bulletUID = getBulletUID()
+    this.bulletUID = getBulletUID()
   }
 
   /**
    * Update loop
    * Responsible for checking if the distance between current position and (fromX, fromY)
-   * is larger than this.data.killDistance
+   * is larger than this.killDistance
    */
   update () {
     // return if not exist or dying, because the body is already destroy
     if (!this.exists || this.dying) { return }
 
     // check distance (x, y) to (fromX, fromY)
-    if (this.data.killType === Phaser.Weapon.KILL_DISTANCE) {
-      if (this.game.physics.arcade.distanceToXY(this, this.data.fromX, this.data.fromY, true) > this.data.killDistance) {
+    if (this.killType === Phaser.Weapon.KILL_DISTANCE) {
+      if (this.game.physics.arcade.distanceToXY(this, this.fromX, this.fromY, true) > this.killDistance) {
         this.preKill()
         return // return because body is killed
       }
     }
 
     // update rotation
-    if (this.data.rotateToVelocity) {
+    if (this.rotateToVelocity) {
       this.body.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x)
     }
   }
@@ -190,6 +191,34 @@ export default class Bullet extends Phaser.Sprite {
   hitEnemy (body1, body2, fixture1, fixture2, begin) {
     // we only care about the begin, no the end event
     if (!begin) { return }
+
+    if (body2.sprite && this.exists) {
+      body2.sprite.hit(this)
+    }
+
+    // It is possible for the bullet to collide with more than one tile body
+    // in the same timestep, in which case this will run twice, so we need to
+    // check if the sprite has already been destroyed.
+    if (this.exists) {
+      this.preKill()
+    }
+  }
+
+  /**
+   * The contact callback when enemyBullet hits player
+   * use body1.sprite, body2.sprite to get sprite
+   * @param {Box2D.Body} body1 - the enemyBullet body, so basically this === body1.sprite
+   * @param {Box2D.Body} body2 - the player body
+   * @param {box2d.b2Fixture} fixture1 - the bullet fixture
+   * @param {box2d.b2Fixture} fixture2 - the enemy fixture
+   * @param {boolean} begin - whether it was a begin or end event the contact object
+   */
+  hitPlayer (body1, body2, fixture1, fixture2, begin) {
+    console.log('hitPlayer', this.shouldHitPlayer)
+    // we only care about the begin, no the end event
+    if (!begin || !this.shouldHitPlayer) { return }
+
+    // TODO: should handle friendly fire here
 
     if (body2.sprite && this.exists) {
       body2.sprite.hit(this)

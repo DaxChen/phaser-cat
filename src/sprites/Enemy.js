@@ -112,14 +112,14 @@ export default class Enemy extends Phaser.Sprite {
       return
     }
     // check bulletUID
-    if (!bullet.data.bulletUID) { return console.error('no bulletUID') }
-    if (this.hitBullets.indexOf(bullet.data.bulletUID) >= 0) { return } // already hit by this
+    if (!bullet.bulletUID) { return console.error('no bulletUID') }
+    if (this.hitBullets.indexOf(bullet.bulletUID) >= 0) { return } // already hit by this
     // add to hitBullets
-    this.hitBullets.push(bullet.data.bulletUID)
+    this.hitBullets.push(bullet.bulletUID)
 
     this.hurting = true
 
-    this.health -= bullet.data.ATK
+    this.health -= bullet.ATK
     // console.log(this.health + '/' + this.maxHealth)
 
     if (this.health <= 0) {

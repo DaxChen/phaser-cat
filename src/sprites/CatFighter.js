@@ -9,6 +9,7 @@ import FireballNormal from '../weapons/FireballNormal'
 import FireballCharged from '../weapons/FireballCharged'
 import FireballSuper from '../weapons/FireballSuper'
 import Rifle from '../weapons/Rifle'
+import { CATEGORY_PLAYER } from '../config'
 
 export default class CatFighter extends Phaser.Sprite {
   constructor ({ game, x, y, asset }) {
@@ -23,6 +24,8 @@ export default class CatFighter extends Phaser.Sprite {
     this.body.setRectangle(13, 28, -1, 8)
     // do not spin when collide
     this.body.fixedRotation = true
+    // collision detection
+    this.body.setCollisionCategory(CATEGORY_PLAYER)
 
     // events
     this.onDeath = new Phaser.Signal()
@@ -276,17 +279,17 @@ export default class CatFighter extends Phaser.Sprite {
     this.weapons[type].trackOffset.y = 0
     if (this.direction <= 45 && this.direction >= -45) {
       // right
-      this.weapons[type].trackOffset.x = 10
+      this.weapons[type].trackOffset.x += 20
     } else if (this.direction <= -135 || this.direction >= 135) {
       // left
-      this.weapons[type].trackOffset.x = -10
+      this.weapons[type].trackOffset.x -= 25
     }
     if (this.direction >= 45 && this.direction <= 135) {
       // down
-      this.weapons[type].trackOffset.y = 20
+      this.weapons[type].trackOffset.y += 35
     } else if (this.direction <= -45 && this.direction >= -135) {
       // up
-      this.weapons[type].trackOffset.y = -10
+      this.weapons[type].trackOffset.y -= 20
     }
 
     const bullet = this.weapons[type].fire()
@@ -312,7 +315,7 @@ export default class CatFighter extends Phaser.Sprite {
     }
     if (this.direction >= 45 && this.direction <= 135) {
       // down
-      rifle.trackOffset.y += 10
+      rifle.trackOffset.y += 20
     } else if (this.direction <= -45 && this.direction >= -135) {
       // up
       rifle.trackOffset.y -= 20

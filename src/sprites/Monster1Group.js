@@ -14,12 +14,10 @@ export default class Monster1Group extends Phaser.Group {
 
   spawn (x, y) {
     let monster = this.getFirstExists(false)
-    if (monster) {
-      monster.spawn(x, y)
-    } else {
+    if (!monster) {
       monster = new Monster1({ game: this.game })
       this.add(monster, true)
-      monster.spawn(x, y)
     }
+    monster.spawn(x, y)
   }
 }

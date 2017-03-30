@@ -2,6 +2,7 @@
 import Phaser from 'phaser'
 import CatFighter from '../sprites/CatFighter'
 import Monster1Group from '../sprites/Monster1Group'
+import MonsterBossGroup from '../sprites/MonsterBossGroup'
 import HUD from '../displays/HUD'
 
 /**
@@ -34,6 +35,9 @@ export default class Game extends Phaser.State {
     // the monster1 pool
     this.monster1group = new Monster1Group({ game: this.game })
     this.monster1group.onChildKill.add(this.onEnemyKill, this)
+    // the monster boss pool
+    this.monsterBossGroup = new MonsterBossGroup({ game: this.game })
+    this.monsterBossGroup.onChildKill.add(this.onEnemyKill, this)
     // internal time of when the next enemy can spawn
     this._nextEnemy = 0
     // the spawn rate of monster
@@ -81,6 +85,14 @@ export default class Game extends Phaser.State {
       this.monster1group.spawn(Math.random() < 0.5 ? 0 : this.world.width, this.world.randomY)
     } else {
       this.monster1group.spawn(this.world.randomX, Math.random() < 0.5 ? 0 : this.world.height)
+    }
+
+    if (Math.random() < 0.05) {
+      if (Math.random() < 0.5) {
+        this.monsterBossGroup.spawn(Math.random() < 0.5 ? 0 : this.world.width, this.world.randomY)
+      } else {
+        this.monsterBossGroup.spawn(this.world.randomX, Math.random() < 0.5 ? 0 : this.world.height)
+      }
     }
 
     this._nextEnemy = this.game.time.time + this.spawnRate

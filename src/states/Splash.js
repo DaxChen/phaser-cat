@@ -17,6 +17,8 @@ export default class extends Phaser.State {
     this.load.spritesheet('fireball_charged', 'assets/images/fireball_charged.png', 32, 32)
     this.load.spritesheet('fireball_super', 'assets/images/fireball_super.png', 64, 64)
     this.load.spritesheet('monster1', 'assets/images/monster1.png', 64, 64)
+    this.load.spritesheet('monster_boss', 'assets/images/monster_boss.png', 64, 64)
+    this.load.spritesheet('monster_boss_bullet', 'assets/images/monster_boss_bullet.png', 32, 32)
     this.load.image('background', 'assets/images/tile_grass-600x600.jpg')
     // debug background
     // this.load.image('debug-grid', 'assets/images/debug-grid-1920x1920.png')

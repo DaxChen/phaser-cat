@@ -9,8 +9,8 @@ export class FireballNormalBullet extends Bullet {
     this.animations.add('end', [4, 5, 6], 12, false)
       .onComplete.add(() => this.kill())
 
-    this.data.ATK = 10
-    this.data.flyAnim = 'fly'
+    this.ATK = 10
+    this.flyAnim = 'fly'
   }
   resetBody () {
     Bullet.prototype.resetBody.call(this)
@@ -32,8 +32,8 @@ export class FireballChargedBullet extends Bullet {
     this.animations.add('end', [4, 5, 6], 12, false)
       .onComplete.add(() => this.kill())
 
-    this.data.ATK = 20
-    this.data.flyAnim = 'fly'
+    this.ATK = 20
+    this.flyAnim = 'fly'
   }
   resetBody () {
     Bullet.prototype.resetBody.call(this)
@@ -55,8 +55,8 @@ export class FireballSuperBullet extends Bullet {
     this.animations.add('end', [4, 5, 6], 12, false)
       .onComplete.add(() => this.kill())
 
-    this.data.ATK = 40
-    this.data.flyAnim = 'fly'
+    this.ATK = 40
+    this.flyAnim = 'fly'
   }
   resetBody () {
     Bullet.prototype.resetBody.call(this)

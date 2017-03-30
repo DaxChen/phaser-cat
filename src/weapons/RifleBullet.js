@@ -12,7 +12,7 @@ export default class RifleBullet extends Bullet {
 
     g.destroy()
 
-    this.data.ATK = 1
+    this.ATK = 1
   }
   // resetBody () {
   //   Bullet.prototype.resetBody.call(this)
